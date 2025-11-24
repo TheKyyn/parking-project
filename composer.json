@@ -1,0 +1,43 @@
+{
+    "name": "parking/shared-parking-system",
+    "description": "Clean Architecture PHP-based parking management system",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.0",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "firebase/php-jwt": "^6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "phpstan/phpstan": "^1.10",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "ParkingSystem\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ParkingSystem\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage",
+        "phpstan": "phpstan analyse src tests --level=7",
+        "phpcs": "phpcs --standard=PSR12 src tests",
+        "phpcbf": "phpcbf --standard=PSR12 src tests",
+        "check": [
+            "@phpcs",
+            "@phpstan",
+            "@test"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

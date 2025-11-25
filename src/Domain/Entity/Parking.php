@@ -116,17 +116,9 @@ class Parking
 
     public function getAvailableSpacesAt(\DateTimeInterface $dateTime): int
     {
-        $occupiedSpaces = 0;
-        
-        // Count reserved spaces at given time
-        foreach ($this->reservations as $reservationId) {
-            // This would need actual reservation data
-            // In real implementation, this would be handled by a use case
-            // that has access to the reservation repository
-        }
-        
-        // Count active sessions
-        $occupiedSpaces += count($this->activeParkingSessions);
+        // This method provides a simple calculation based on currently tracked sessions
+        // For complete availability including reservations, use the CheckAvailability use case
+        $occupiedSpaces = count($this->activeParkingSessions);
         
         return max(0, $this->totalSpaces - $occupiedSpaces);
     }

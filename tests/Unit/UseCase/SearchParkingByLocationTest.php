@@ -9,7 +9,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ParkingSystem\UseCase\Parking\SearchParkingByLocation;
 use ParkingSystem\UseCase\Parking\SearchParkingByLocationRequest;
 use ParkingSystem\UseCase\Parking\SearchParkingByLocationResponse;
-use ParkingSystem\UseCase\Parking\ParkingSearchResult;
 use ParkingSystem\UseCase\Parking\AvailabilityCheckerInterface;
 use ParkingSystem\Domain\Repository\ParkingRepositoryInterface;
 use ParkingSystem\Domain\Entity\Parking;

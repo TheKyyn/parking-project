@@ -33,7 +33,12 @@ $router->get('/', function () {
     return JsonResponse::success([
         'name' => 'Parking System API',
         'version' => '1.0.0',
-        'status' => 'running'
+        'status' => 'running',
+        'endpoints' => [
+            'POST /api/users' => 'Register new user',
+            'POST /api/auth/login' => 'Authenticate user',
+            'GET /api/users/profile' => 'Get user profile (auth required)',
+        ]
     ], 'Welcome to Parking System API');
 });
 
@@ -45,10 +50,9 @@ $router->get('/health', function () {
     ]);
 });
 
-// TODO: Ajouter les routes API ici
-// $router->post('/api/auth/login', [UserController::class, 'login']);
-// $router->get('/api/parkings', [ParkingController::class, 'index']);
-// etc.
+// Charge les routes depuis le fichier dédié
+$routesLoader = require __DIR__ . '/../src/Infrastructure/Http/routes.php';
+$routesLoader($router);
 
 // ==========================================
 // DISPATCH

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ParkingSystem\Infrastructure\Service;
 
+use ParkingSystem\UseCase\User\IdGeneratorInterface;
+
 /**
  * UUID v4 identifier generator
  */

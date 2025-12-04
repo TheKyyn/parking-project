@@ -290,6 +290,142 @@ Delete a parking (owner only, must be the parking owner).
 
 ---
 
+## Reservation Endpoints
+
+### POST /api/reservations
+Create a new reservation (user only).
+
+**Authentication:** Required (JWT token with type='user')
+
+**Request Body:**
+```json
+{
+  "parkingId": "550e8400-e29b-41d4-a716-446655440000",
+  "startTime": "2025-12-04T10:00:00",
+  "endTime": "2025-12-04T12:00:00"
+}
+```
+
+**Validation:**
+- `parkingId`: required, must exist
+- `startTime`: required, ISO 8601 format, must be in the future
+- `endTime`: required, ISO 8601 format, must be after startTime
+- Duration: minimum 15 minutes, maximum 24 hours
+- No conflicts with existing reservations
+- Parking must be open during reservation period
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Reservation created successfully",
+  "data": {
+    "reservationId": "550e8400-e29b-41d4-a716-446655440000",
+    "userId": "user-uuid",
+    "parkingId": "parking-uuid",
+    "startTime": "2025-12-04T10:00:00+00:00",
+    "endTime": "2025-12-04T12:00:00+00:00",
+    "totalAmount": 7.0,
+    "durationMinutes": 120,
+    "status": "confirmed"
+  }
+}
+```
+
+**Cost Calculation:**
+- Billed in 15-minute increments (quarters)
+- Formula: `quarters * (hourlyRate / 4)`
+- Example: 2 hours at 3.50€/hour = 8 quarters × 0.875€ = 7.00€
+
+**Errors:**
+- `400` - Validation error, conflict, or business rule violation
+- `401` - Authentication required
+- `403` - Owner trying to create reservation (users only)
+- `404` - Parking or user not found
+
+---
+
+### GET /api/reservations
+List all reservations for the authenticated user.
+
+**Authentication:** Required (JWT token with type='user')
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Reservations retrieved successfully",
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "userId": "user-uuid",
+      "parkingId": "parking-uuid",
+      "startTime": "2025-12-04 10:00:00",
+      "endTime": "2025-12-04 12:00:00",
+      "totalAmount": 7.0,
+      "status": "confirmed",
+      "createdAt": "2025-12-02 15:00:00"
+    }
+  ]
+}
+```
+
+**Errors:**
+- `401` - Authentication required
+- `403` - Owner trying to access reservations (users only)
+
+---
+
+### GET /api/reservations/:id
+Get reservation details (user must own the reservation).
+
+**Authentication:** Required (JWT token with type='user')
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Reservation retrieved successfully",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "userId": "user-uuid",
+    "parkingId": "parking-uuid",
+    "startTime": "2025-12-04 10:00:00",
+    "endTime": "2025-12-04 12:00:00",
+    "totalAmount": 7.0,
+    "status": "confirmed",
+    "createdAt": "2025-12-02 15:00:00"
+  }
+}
+```
+
+**Errors:**
+- `401` - Authentication required
+- `403` - Not your reservation or owner trying to access
+- `404` - Reservation not found
+
+---
+
+### DELETE /api/reservations/:id
+Cancel a reservation (only if not yet started).
+
+**Authentication:** Required (JWT token with type='user')
+
+**Business Rules:**
+- Can only cancel reservations that haven't started yet (startTime > now)
+- Must be the reservation owner
+- Cannot cancel already cancelled reservations
+
+**Response (204 No Content)**
+
+**Errors:**
+- `400` - Reservation already started or already cancelled
+- `401` - Authentication required
+- `403` - Not your reservation or owner trying to cancel
+- `404` - Reservation not found
+
+---
+
 ## Error Response Format
 All error responses follow this format:
 

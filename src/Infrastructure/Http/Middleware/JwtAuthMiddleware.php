@@ -40,6 +40,7 @@ class JwtAuthMiddleware implements AuthMiddlewareInterface
             return [
                 'userId' => $payload['userId'],
                 'email' => $payload['email'],
+                'type' => $payload['type'] ?? null,
             ];
 
         } catch (\InvalidArgumentException $e) {

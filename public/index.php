@@ -38,6 +38,15 @@ $router->get('/', function () {
             'POST /api/users' => 'Register new user',
             'POST /api/auth/login' => 'Authenticate user',
             'GET /api/users/profile' => 'Get user profile (auth required)',
+            'GET /api/parkings' => 'List all parkings',
+            'GET /api/parkings/:id' => 'Get parking details',
+            'POST /api/parkings' => 'Create parking (owner only)',
+            'PUT /api/parkings/:id' => 'Update parking (owner only)',
+            'DELETE /api/parkings/:id' => 'Delete parking (owner only)',
+            'POST /api/reservations' => 'Create reservation (user only)',
+            'GET /api/reservations' => 'List user reservations (user only)',
+            'GET /api/reservations/:id' => 'Get reservation details (user only)',
+            'DELETE /api/reservations/:id' => 'Cancel reservation (user only)',
         ]
     ], 'Welcome to Parking System API');
 });

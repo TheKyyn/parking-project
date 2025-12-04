@@ -109,6 +109,13 @@ export const UserDashboard = () => {
 
         <h2 className="text-2xl font-semibold mb-4">Mes Réservations</h2>
 
+        {/* User Calendar */}
+        {!isLoading && reservations.length > 0 && (
+          <div className="mb-8">
+            <UserCalendar reservations={reservations} />
+          </div>
+        )}
+
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center min-h-[300px]">
@@ -184,13 +191,6 @@ export const UserDashboard = () => {
                 )}
               </Card>
             ))}
-          </div>
-        )}
-
-        {/* User Calendar */}
-        {!isLoading && reservations.length > 0 && (
-          <div className="mt-8">
-            <UserCalendar reservations={reservations} />
           </div>
         )}
       </div>

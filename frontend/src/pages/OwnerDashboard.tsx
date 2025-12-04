@@ -326,6 +326,13 @@ export const OwnerDashboard = () => {
           </div>
         )}
 
+        {/* Owner Calendar */}
+        {!isLoading && parkings.length > 0 && (
+          <div className="mb-8">
+            <OwnerCalendar parkings={parkings} />
+          </div>
+        )}
+
         {/* Empty State */}
         {!isLoading && parkings.length === 0 && (
           <Card className="text-center py-12">
@@ -502,13 +509,6 @@ export const OwnerDashboard = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
-        {/* Owner Calendar */}
-        {!isLoading && parkings.length > 0 && (
-          <div className="mt-8">
-            <OwnerCalendar parkings={parkings} />
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, Views, type View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -34,6 +34,8 @@ interface UserCalendarProps {
 export const UserCalendar = ({ reservations }: UserCalendarProps) => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<View>(Views.MONTH);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const events: CalendarEvent[] = useMemo(() => {
     return reservations.map((reservation) => ({
@@ -121,7 +123,10 @@ export const UserCalendar = ({ reservations }: UserCalendarProps) => {
             onSelectEvent={handleEventClick}
             eventPropGetter={eventStyleGetter}
             views={[Views.MONTH, Views.WEEK]}
-            defaultView={Views.MONTH}
+            view={currentView}
+            onView={setCurrentView}
+            date={currentDate}
+            onNavigate={setCurrentDate}
             messages={{
               next: 'Suivant',
               previous: 'Précédent',

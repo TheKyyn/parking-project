@@ -14,10 +14,24 @@ use ParkingSystem\Infrastructure\Http\Middleware\CorsMiddleware;
 error_reporting(E_ALL);
 ini_set('display_errors', '0'); // Pas d'affichage direct des erreurs en prod
 
+// Configure CORS headers AVANT tout traitement
+// Cela permet de gérer CORS même pour les 404/500
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Max-Age: 86400');
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
 // Crée le router
 $router = new Router();
 
-// Middleware CORS global
+// Middleware CORS global (backup, au cas où)
 $corsMiddleware = CorsMiddleware::permissive();
 $router->addGlobalMiddleware(function ($request) use ($corsMiddleware) {
     $corsMiddleware->handle($request);

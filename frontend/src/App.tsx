@@ -7,6 +7,7 @@ import { Landing } from '@/pages/Landing';
 import { Login } from '@/pages/Login';
 import { Register } from '@/pages/Register';
 import { Parkings } from '@/pages/Parkings';
+import { Reserve } from '@/pages/Reserve';
 import { UserDashboard } from '@/pages/UserDashboard';
 import { OwnerDashboard } from '@/pages/OwnerDashboard';
 import { NotFound } from '@/pages/NotFound';
@@ -46,6 +47,14 @@ function App() {
                 element={
                   <ProtectedRoute requiredUserType="user">
                     <UserDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/parkings/:id/reserve"
+                element={
+                  <ProtectedRoute requiredUserType="user">
+                    <Reserve />
                   </ProtectedRoute>
                 }
               />

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/contexts/AuthContext';
 import { parkingApi } from '@/lib/api';
 import type { Parking } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -51,7 +50,6 @@ const parkingSchema = z.object({
 type ParkingFormData = z.infer<typeof parkingSchema>;
 
 export const OwnerDashboard = () => {
-  const { user } = useAuth();
   const [parkings, setParkings] = useState<Parking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');

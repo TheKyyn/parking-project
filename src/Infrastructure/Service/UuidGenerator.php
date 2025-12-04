@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace ParkingSystem\Infrastructure\Service;
 
-use ParkingSystem\UseCase\User\IdGeneratorInterface;
+use ParkingSystem\UseCase\User\IdGeneratorInterface as UserIdGeneratorInterface;
+use ParkingSystem\UseCase\Parking\IdGeneratorInterface as ParkingIdGeneratorInterface;
+use ParkingSystem\UseCase\Reservation\IdGeneratorInterface as ReservationIdGeneratorInterface;
+use ParkingSystem\UseCase\Session\IdGeneratorInterface as SessionIdGeneratorInterface;
 
 /**
  * UUID v4 identifier generator
  */
-class UuidGenerator implements IdGeneratorInterface
+class UuidGenerator implements
+    UserIdGeneratorInterface,
+    ParkingIdGeneratorInterface,
+    ReservationIdGeneratorInterface,
+    SessionIdGeneratorInterface
 {
     /**
      * Generate a UUID v4 (random)

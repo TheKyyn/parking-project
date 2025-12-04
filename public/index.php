@@ -47,6 +47,10 @@ $router->get('/', function () {
             'GET /api/reservations' => 'List user reservations (user only)',
             'GET /api/reservations/:id' => 'Get reservation details (user only)',
             'DELETE /api/reservations/:id' => 'Cancel reservation (user only)',
+            'POST /api/sessions' => 'Start parking session (user only)',
+            'PUT /api/sessions/:id/end' => 'End parking session (user only)',
+            'GET /api/sessions' => 'List user sessions (user only)',
+            'GET /api/sessions/:id' => 'Get session details (user only)',
         ]
     ], 'Welcome to Parking System API');
 });

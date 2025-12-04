@@ -6,6 +6,7 @@ use ParkingSystem\Infrastructure\Http\Routing\Router;
 use ParkingSystem\Infrastructure\Http\Controller\UserController;
 use ParkingSystem\Infrastructure\Http\Controller\ParkingController;
 use ParkingSystem\Infrastructure\Http\Controller\ReservationController;
+use ParkingSystem\Infrastructure\Http\Controller\SessionController;
 use ParkingSystem\Infrastructure\Http\Middleware\AuthMiddleware;
 use ParkingSystem\Infrastructure\Http\Middleware\JwtAuthMiddleware;
 use ParkingSystem\Infrastructure\Http\Middleware\OwnerAuthMiddleware;
@@ -15,10 +16,13 @@ use ParkingSystem\Infrastructure\Service\BcryptPasswordHasher;
 use ParkingSystem\Infrastructure\Service\FirebaseJwtTokenGenerator;
 use ParkingSystem\Infrastructure\Service\SimplePricingCalculator;
 use ParkingSystem\Infrastructure\Service\SimpleConflictChecker;
+use ParkingSystem\Infrastructure\Service\SimpleEntryValidator;
+use ParkingSystem\Infrastructure\Service\SessionPricingCalculator;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLUserRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingOwnerRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLReservationRepository;
+use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingSessionRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLConnection;
 use ParkingSystem\UseCase\User\CreateUser;
 use ParkingSystem\UseCase\User\AuthenticateUser;
@@ -27,6 +31,8 @@ use ParkingSystem\UseCase\Parking\UpdateParking;
 use ParkingSystem\UseCase\Parking\DeleteParking;
 use ParkingSystem\UseCase\Reservation\CreateReservation;
 use ParkingSystem\UseCase\Reservation\CancelReservation;
+use ParkingSystem\UseCase\Session\EnterParking;
+use ParkingSystem\UseCase\Session\ExitParking;
 
 /**
  * Enregistre toutes les routes de l'application
@@ -64,6 +70,7 @@ return function (Router $router): void {
     $parkingRepository = new MySQLParkingRepository($dbConnection);
     $parkingOwnerRepository = new MySQLParkingOwnerRepository($dbConnection);
     $reservationRepository = new MySQLReservationRepository($dbConnection);
+    $sessionRepository = new MySQLParkingSessionRepository($dbConnection);
 
     // Services
     $idGenerator = new UuidGenerator();
@@ -72,6 +79,8 @@ return function (Router $router): void {
     $jwtGenerator = new FirebaseJwtTokenGenerator($jwtSecret, (int)($_ENV['JWT_EXPIRATION'] ?? 3600));
     $pricingCalculator = new SimplePricingCalculator($parkingRepository);
     $conflictChecker = new SimpleConflictChecker($reservationRepository, $parkingRepository);
+    $entryValidator = new SimpleEntryValidator($reservationRepository);
+    $sessionPricingCalculator = new SessionPricingCalculator();
 
     // Use Cases
     $createUserUseCase = new CreateUser(
@@ -112,6 +121,22 @@ return function (Router $router): void {
         $reservationRepository
     );
 
+    $enterParkingUseCase = new EnterParking(
+        $sessionRepository,
+        $parkingRepository,
+        $userRepository,
+        $entryValidator,
+        $idGenerator
+    );
+
+    $exitParkingUseCase = new ExitParking(
+        $sessionRepository,
+        $parkingRepository,
+        $reservationRepository,
+        $sessionPricingCalculator,
+        $entryValidator
+    );
+
     // Controllers
     $userController = new UserController(
         $createUserUseCase,
@@ -130,6 +155,12 @@ return function (Router $router): void {
         $createReservationUseCase,
         $cancelReservationUseCase,
         $reservationRepository
+    );
+
+    $sessionController = new SessionController(
+        $enterParkingUseCase,
+        $exitParkingUseCase,
+        $sessionRepository
     );
 
     // Middleware
@@ -190,4 +221,21 @@ return function (Router $router): void {
     $router->delete('/api/reservations/:id', [$reservationController, 'cancel'])
         ->middleware($userAuthMiddleware)
         ->name('reservations.cancel');
+
+    // Session routes (user-only)
+    $router->post('/api/sessions', [$sessionController, 'start'])
+        ->middleware($userAuthMiddleware)
+        ->name('sessions.start');
+
+    $router->put('/api/sessions/:id/end', [$sessionController, 'end'])
+        ->middleware($userAuthMiddleware)
+        ->name('sessions.end');
+
+    $router->get('/api/sessions', [$sessionController, 'index'])
+        ->middleware($userAuthMiddleware)
+        ->name('sessions.index');
+
+    $router->get('/api/sessions/:id', [$sessionController, 'show'])
+        ->middleware($userAuthMiddleware)
+        ->name('sessions.show');
 };

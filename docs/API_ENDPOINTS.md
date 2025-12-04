@@ -481,3 +481,239 @@ TOKEN="your-jwt-token-here"
 curl -X GET http://localhost:8000/api/users/profile \
   -H "Authorization: Bearer $TOKEN"
 ```
+
+---
+
+## Session Endpoints
+
+### POST /api/sessions
+Start a parking session from an active reservation (user only).
+
+**Authentication:** Required (JWT token with type='user')
+
+**Request Body:**
+```json
+{
+  "parkingId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Validation:**
+- `parkingId`: required, must exist
+- User must have an active reservation or subscription for this parking
+- No active session must already exist for this user-parking combination
+- Parking must be open at entry time
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Session started successfully",
+  "data": {
+    "sessionId": "uuid",
+    "userId": "uuid",
+    "parkingId": "uuid",
+    "reservationId": "uuid",
+    "startTime": "2025-12-04T10:00:00+00:00",
+    "authorizedEndTime": "2025-12-04T12:00:00+00:00",
+    "status": "active"
+  }
+}
+```
+
+**Errors:**
+- `400` - No active reservation/subscription, parking closed, or active session already exists
+- `401` - Authentication required
+- `404` - Parking or user not found
+- `500` - Internal server error
+
+---
+
+### PUT /api/sessions/:id/end
+End an active parking session and calculate final cost.
+
+**Authentication:** Required (JWT token with type='user')
+
+**Path Parameters:**
+- `:id` - Session UUID
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Session ended successfully",
+  "data": {
+    "sessionId": "uuid",
+    "userId": "uuid",
+    "parkingId": "uuid",
+    "startTime": "2025-12-04T10:00:00+00:00",
+    "endTime": "2025-12-04T12:05:00+00:00",
+    "durationMinutes": 125,
+    "baseAmount": 7.0,
+    "overstayPenalty": 0.0,
+    "totalAmount": 7.0,
+    "wasOverstayed": false,
+    "status": "completed"
+  }
+}
+```
+
+**Cost Calculation:**
+- Uses 15-minute billing increments (rounds up)
+- Formula: `quarters * (hourlyRate / 4)`
+- Example: 2h05min at 3.50€/h = 9 quarters * 0.875€ = 7.875€
+- Overstay penalty: €20 base + additional time charged
+
+**Ownership:**
+- Session must belong to the authenticated user
+- Error message: "Unauthorized: This is not your session"
+
+**Errors:**
+- `400` - Session not active (already ended or cancelled)
+- `401` - Authentication required
+- `403` - Not your session (ownership check failed)
+- `404` - Session not found
+- `500` - Internal server error
+
+---
+
+### GET /api/sessions
+List all sessions for the authenticated user.
+
+**Authentication:** Required (JWT token with type='user')
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Sessions retrieved successfully",
+  "data": [
+    {
+      "id": "uuid",
+      "userId": "uuid",
+      "parkingId": "uuid",
+      "reservationId": "uuid",
+      "startTime": "2025-12-04 10:00:00",
+      "endTime": "2025-12-04 12:00:00",
+      "totalAmount": 7.0,
+      "status": "completed",
+      "createdAt": "2025-12-04 10:00:00"
+    }
+  ]
+}
+```
+
+**Status Values:**
+- `active` - Session in progress
+- `completed` - Session ended normally
+- `overstayed` - Session ended with overstay penalty
+
+**Errors:**
+- `401` - Authentication required
+- `500` - Internal server error
+
+---
+
+### GET /api/sessions/:id
+Get session details (user must own the session).
+
+**Authentication:** Required (JWT token with type='user')
+
+**Path Parameters:**
+- `:id` - Session UUID
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Session retrieved successfully",
+  "data": {
+    "id": "uuid",
+    "userId": "uuid",
+    "parkingId": "uuid",
+    "reservationId": "uuid",
+    "startTime": "2025-12-04 10:00:00",
+    "endTime": "2025-12-04 12:00:00",
+    "totalAmount": 7.0,
+    "status": "completed",
+    "createdAt": "2025-12-04 10:00:00"
+  }
+}
+```
+
+**Ownership Check:**
+- Session must belong to the authenticated user
+- Error message: "Unauthorized: This is not your session"
+
+**Errors:**
+- `401` - Authentication required
+- `403` - Not your session (ownership check failed)
+- `404` - Session not found
+- `500` - Internal server error
+
+---
+
+## Session Lifecycle Flow
+
+```
+1. User creates reservation (POST /api/reservations)
+   ↓
+2. User starts session (POST /api/sessions)
+   Status: active
+   ↓
+3. User parks vehicle
+   ↓
+4. User ends session (PUT /api/sessions/:id/end)
+   Status: completed (or overstayed if late)
+   Cost calculated with 15-min increments
+```
+
+**Business Rules:**
+- Session can only be started during reservation time window
+- One active session per user-parking combination
+- Overstay detection: compares endTime with reservation endTime
+- Overstay penalty: €20 + additional time charged
+- Pricing uses SimplePricingCalculator (15-minute increments)
+- Same pricing logic as reservations for consistency
+
+---
+
+## cURL Examples - Sessions
+
+### 1. Start a session
+```bash
+TOKEN="your-jwt-token-here"
+
+curl -X POST http://localhost:8000/api/sessions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "parkingId": "550e8400-e29b-41d4-a716-446655440000"
+  }'
+```
+
+### 2. End a session
+```bash
+TOKEN="your-jwt-token-here"
+SESSION_ID="session-uuid-here"
+
+curl -X PUT http://localhost:8000/api/sessions/$SESSION_ID/end \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 3. List my sessions
+```bash
+TOKEN="your-jwt-token-here"
+
+curl -X GET http://localhost:8000/api/sessions \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 4. Get session details
+```bash
+TOKEN="your-jwt-token-here"
+SESSION_ID="session-uuid-here"
+
+curl -X GET http://localhost:8000/api/sessions/$SESSION_ID \
+  -H "Authorization: Bearer $TOKEN"
+```

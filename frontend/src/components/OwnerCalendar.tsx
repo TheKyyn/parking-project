@@ -174,6 +174,7 @@ export const OwnerCalendar = ({ parkings }: OwnerCalendarProps) => {
         <div className="h-[600px]">
           <Calendar
             localizer={localizer}
+            culture="fr"
             events={events}
             startAccessor="start"
             endAccessor="end"
@@ -197,6 +198,11 @@ export const OwnerCalendar = ({ parkings }: OwnerCalendarProps) => {
               time: 'Heure',
               event: 'Réservation',
               noEventsInRange: 'Aucune réservation pour cette période',
+              allDay: 'Journée entière',
+              work_week: 'Semaine de travail',
+              yesterday: 'Hier',
+              tomorrow: 'Demain',
+              showMore: (total: number) => `+ ${total} plus`,
             }}
           />
         </div>

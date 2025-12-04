@@ -116,6 +116,7 @@ export const UserCalendar = ({ reservations }: UserCalendarProps) => {
         <div className="h-[600px]">
           <Calendar
             localizer={localizer}
+            culture="fr"
             events={events}
             startAccessor="start"
             endAccessor="end"
@@ -135,6 +136,11 @@ export const UserCalendar = ({ reservations }: UserCalendarProps) => {
               week: 'Semaine',
               day: 'Jour',
               noEventsInRange: 'Aucune réservation',
+              allDay: 'Journée entière',
+              work_week: 'Semaine de travail',
+              yesterday: 'Hier',
+              tomorrow: 'Demain',
+              showMore: (total: number) => `+ ${total} plus`,
             }}
           />
         </div>

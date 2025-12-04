@@ -42,7 +42,7 @@ class OwnerAuthMiddleware
             $request->setPathParams(array_merge(
                 $request->getPathParams(),
                 [
-                    '_ownerId' => $userData['userId'],
+                    '_ownerId' => $userData['ownerId'],
                     '_ownerEmail' => $userData['email']
                 ]
             ));

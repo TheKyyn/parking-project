@@ -32,13 +32,19 @@ class JwtAuthMiddleware implements AuthMiddlewareInterface
         try {
             $payload = $this->jwtGenerator->verify($token);
 
-            // Verify required fields are present
-            if (!isset($payload['userId'], $payload['email'])) {
+            // Verify required fields are present (userId OR ownerId)
+            if (!isset($payload['email'])) {
                 throw new \InvalidArgumentException('Invalid JWT payload: missing required fields');
             }
 
+            if (!isset($payload['userId']) && !isset($payload['ownerId'])) {
+                throw new \InvalidArgumentException('Invalid JWT payload: missing required fields');
+            }
+
+            // Return payload with all fields for flexibility
             return [
-                'userId' => $payload['userId'],
+                'userId' => $payload['userId'] ?? null,
+                'ownerId' => $payload['ownerId'] ?? null,
                 'email' => $payload['email'],
                 'type' => $payload['type'] ?? null,
             ];

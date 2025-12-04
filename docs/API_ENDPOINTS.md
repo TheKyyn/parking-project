@@ -115,6 +115,146 @@ Get the authenticated user's profile.
 
 ---
 
+## Owner Endpoints
+
+### POST /api/owners
+Register a new parking owner.
+
+**Request Body:**
+```json
+{
+  "email": "owner@example.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Owner"
+}
+```
+
+**Validation:**
+- `email`: required, valid email format
+- `password`: required, minimum 8 characters
+- `firstName`: required, minimum 2 characters
+- `lastName`: required, minimum 2 characters
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Owner created successfully",
+  "data": {
+    "ownerId": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "owner@example.com",
+    "firstName": "John",
+    "lastName": "Owner",
+    "createdAt": "2025-12-04 12:00:00"
+  }
+}
+```
+
+**Errors:**
+- `400` - Owner already exists
+- `422` - Validation error
+
+---
+
+### POST /api/owners/login
+Authenticate a parking owner.
+
+**Request Body:**
+```json
+{
+  "email": "owner@example.com",
+  "password": "password123"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Authentication successful",
+  "data": {
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+    "ownerId": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "owner@example.com",
+    "firstName": "John",
+    "lastName": "Owner",
+    "expiresIn": 3600
+  }
+}
+```
+
+**JWT Token includes:**
+- `type: 'owner'` (critical for authorization)
+- `ownerId`
+- `email`
+
+**Errors:**
+- `401` - Invalid credentials
+
+---
+
+### GET /api/owners/profile
+Get owner profile (owner authentication required).
+
+**Authentication:** Required (JWT token with type='owner')
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Owner profile retrieved successfully",
+  "data": {
+    "ownerId": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "owner@example.com",
+    "firstName": "John",
+    "lastName": "Owner",
+    "createdAt": "2025-12-04 12:00:00"
+  }
+}
+```
+
+**Errors:**
+- `401` - Authentication required
+- `403` - Not an owner account
+- `404` - Owner not found
+
+---
+
+### PUT /api/owners/profile
+Update owner profile (owner authentication required).
+
+**Authentication:** Required (JWT token with type='owner')
+
+**Request Body (all fields optional):**
+```json
+{
+  "firstName": "Jane",
+  "lastName": "UpdatedOwner"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Owner profile updated successfully",
+  "data": {
+    "ownerId": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "owner@example.com",
+    "firstName": "Jane",
+    "lastName": "UpdatedOwner"
+  }
+}
+```
+
+**Errors:**
+- `401` - Authentication required
+- `403` - Not an owner account
+- `422` - Validation error
+
+---
+
 ## Parking Endpoints
 
 ### GET /api/parkings

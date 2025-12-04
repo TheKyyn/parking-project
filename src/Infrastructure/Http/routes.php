@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use ParkingSystem\Infrastructure\Http\Routing\Router;
 use ParkingSystem\Infrastructure\Http\Controller\UserController;
+use ParkingSystem\Infrastructure\Http\Controller\OwnerController;
 use ParkingSystem\Infrastructure\Http\Controller\ParkingController;
 use ParkingSystem\Infrastructure\Http\Controller\ReservationController;
 use ParkingSystem\Infrastructure\Http\Controller\SessionController;
@@ -26,6 +27,10 @@ use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingSessionRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLConnection;
 use ParkingSystem\UseCase\User\CreateUser;
 use ParkingSystem\UseCase\User\AuthenticateUser;
+use ParkingSystem\UseCase\ParkingOwner\CreateParkingOwner;
+use ParkingSystem\UseCase\ParkingOwner\AuthenticateParkingOwner;
+use ParkingSystem\UseCase\ParkingOwner\GetParkingOwnerProfile;
+use ParkingSystem\UseCase\ParkingOwner\UpdateParkingOwner;
 use ParkingSystem\UseCase\Parking\CreateParking;
 use ParkingSystem\UseCase\Parking\UpdateParking;
 use ParkingSystem\UseCase\Parking\DeleteParking;
@@ -95,6 +100,26 @@ return function (Router $router): void {
         $jwtGenerator
     );
 
+    $createOwnerUseCase = new CreateParkingOwner(
+        $parkingOwnerRepository,
+        $passwordHasher,
+        $idGenerator
+    );
+
+    $authenticateOwnerUseCase = new AuthenticateParkingOwner(
+        $parkingOwnerRepository,
+        $passwordHasher,
+        $jwtGenerator
+    );
+
+    $getOwnerProfileUseCase = new GetParkingOwnerProfile(
+        $parkingOwnerRepository
+    );
+
+    $updateOwnerUseCase = new UpdateParkingOwner(
+        $parkingOwnerRepository
+    );
+
     $createParkingUseCase = new CreateParking(
         $parkingRepository,
         $parkingOwnerRepository,
@@ -144,6 +169,14 @@ return function (Router $router): void {
         $userRepository
     );
 
+    $ownerController = new OwnerController(
+        $createOwnerUseCase,
+        $authenticateOwnerUseCase,
+        $getOwnerProfileUseCase,
+        $updateOwnerUseCase,
+        $parkingOwnerRepository
+    );
+
     $parkingController = new ParkingController(
         $createParkingUseCase,
         $updateParkingUseCase,
@@ -183,6 +216,22 @@ return function (Router $router): void {
     $router->get('/api/users/profile', [$userController, 'getProfile'])
         ->middleware($authMiddleware)
         ->name('users.profile');
+
+    // Owner routes (public)
+    $router->post('/api/owners', [$ownerController, 'register'])
+        ->name('owners.register');
+
+    $router->post('/api/owners/login', [$ownerController, 'login'])
+        ->name('owners.login');
+
+    // Owner routes (owner auth required)
+    $router->get('/api/owners/profile', [$ownerController, 'getProfile'])
+        ->middleware($ownerAuthMiddleware)
+        ->name('owners.profile');
+
+    $router->put('/api/owners/profile', [$ownerController, 'updateProfile'])
+        ->middleware($ownerAuthMiddleware)
+        ->name('owners.profile.update');
 
     // Parking routes
     // Public routes

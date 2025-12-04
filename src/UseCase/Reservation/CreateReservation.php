@@ -43,7 +43,14 @@ class CreateReservation
         // Check if parking is open during reservation period
         $this->validateParkingOpenHours($parking, $request->startTime, $request->endTime);
 
-        // Check availability
+        // Check real-time availability
+        if ($parking->getAvailableSpots() <= 0) {
+            throw new NoAvailableSpaceException(
+                'No available spots in this parking'
+            );
+        }
+
+        // Check availability conflicts
         if (!$this->conflictChecker->hasAvailableSpacesDuring(
             $request->parkingId,
             $request->startTime,
@@ -75,6 +82,13 @@ class CreateReservation
 
         // Confirm reservation immediately
         $reservation->confirm();
+
+        // Decrement available spots
+        $parking->reserveSpot();
+        $this->parkingRepository->updateAvailableSpots(
+            $parking->getId(),
+            $parking->getAvailableSpots()
+        );
 
         // Save reservation
         $this->reservationRepository->save($reservation);

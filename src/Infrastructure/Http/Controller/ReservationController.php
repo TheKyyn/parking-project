@@ -20,7 +20,8 @@ class ReservationController
     public function __construct(
         private CreateReservation $createReservationUseCase,
         private CancelReservation $cancelReservationUseCase,
-        private ReservationRepositoryInterface $reservationRepository
+        private ReservationRepositoryInterface $reservationRepository,
+        private \ParkingSystem\Domain\Repository\ParkingRepositoryInterface $parkingRepository
     ) {
     }
 
@@ -113,12 +114,20 @@ class ReservationController
             // Récupère les réservations de l'utilisateur
             $reservations = $this->reservationRepository->findByUserId($userId);
 
-            // Formate la réponse
+            // Formate la réponse avec données parking jointes
             $reservationsArray = array_map(function ($reservation) {
+                $parking = $this->parkingRepository->findById($reservation->getParkingId());
+
                 return [
                     'id' => $reservation->getId(),
                     'userId' => $reservation->getUserId(),
                     'parkingId' => $reservation->getParkingId(),
+                    'parking' => $parking ? [
+                        'id' => $parking->getId(),
+                        'name' => $parking->getName(),
+                        'address' => $parking->getAddress(),
+                        'hourlyRate' => $parking->getHourlyRate(),
+                    ] : null,
                     'startTime' => $reservation->getStartTime()->format('Y-m-d H:i:s'),
                     'endTime' => $reservation->getEndTime()->format('Y-m-d H:i:s'),
                     'totalAmount' => $reservation->getTotalAmount(),

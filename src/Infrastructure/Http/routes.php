@@ -143,7 +143,8 @@ return function (Router $router): void {
     );
 
     $cancelReservationUseCase = new CancelReservation(
-        $reservationRepository
+        $reservationRepository,
+        $parkingRepository
     );
 
     $enterParkingUseCase = new EnterParking(
@@ -187,7 +188,8 @@ return function (Router $router): void {
     $reservationController = new ReservationController(
         $createReservationUseCase,
         $cancelReservationUseCase,
-        $reservationRepository
+        $reservationRepository,
+        $parkingRepository
     );
 
     $sessionController = new SessionController(

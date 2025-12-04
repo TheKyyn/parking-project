@@ -140,6 +140,7 @@ class ParkingController
                     ],
                     'hourlyRate' => $parking->getHourlyRate(),
                     'totalSpots' => $parking->getTotalSpaces(),
+                    'availableSpots' => $parking->getAvailableSpots(),
                     'createdAt' => $parking->getCreatedAt()->format('Y-m-d H:i:s'),
                 ];
             }, $parkings);
@@ -182,6 +183,7 @@ class ParkingController
                 ],
                 'hourlyRate' => $parking->getHourlyRate(),
                 'totalSpots' => $parking->getTotalSpaces(),
+                'availableSpots' => $parking->getAvailableSpots(),
                 'createdAt' => $parking->getCreatedAt()->format('Y-m-d H:i:s'),
             ], 'Parking retrieved successfully');
 

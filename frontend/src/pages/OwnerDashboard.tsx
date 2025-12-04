@@ -126,6 +126,7 @@ export const OwnerDashboard = () => {
         },
         hourlyRate: parseFloat(data.hourlyRate),
         totalSpots: parseInt(data.totalSpots),
+        availableSpots: parseInt(data.totalSpots), // Initialize with total spots
       });
 
       if (response.success) {
@@ -157,6 +158,7 @@ export const OwnerDashboard = () => {
         },
         hourlyRate: parseFloat(data.hourlyRate),
         totalSpots: parseInt(data.totalSpots),
+        availableSpots: selectedParking.availableSpots, // Keep existing availability
       });
 
       if (response.success) {

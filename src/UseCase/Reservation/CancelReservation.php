@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ParkingSystem\UseCase\Reservation;
 
 use ParkingSystem\Domain\Repository\ReservationRepositoryInterface;
+use ParkingSystem\Domain\Repository\ParkingRepositoryInterface;
 
 /**
  * CancelReservation Use Case
@@ -14,11 +15,13 @@ use ParkingSystem\Domain\Repository\ReservationRepositoryInterface;
  * - Only the reservation owner can cancel it
  * - Cannot cancel a reservation that has already started
  * - Cannot cancel an already cancelled reservation
+ * - Must release parking spot when cancelled
  */
 class CancelReservation
 {
     public function __construct(
-        private ReservationRepositoryInterface $reservationRepository
+        private ReservationRepositoryInterface $reservationRepository,
+        private ParkingRepositoryInterface $parkingRepository
     ) {
     }
 
@@ -52,6 +55,16 @@ class CancelReservation
 
         // Annule la réservation
         $reservation->cancel();
+
+        // Incrémente les places disponibles
+        $parking = $this->parkingRepository->findById($reservation->getParkingId());
+        if ($parking !== null) {
+            $parking->releaseSpot();
+            $this->parkingRepository->updateAvailableSpots(
+                $parking->getId(),
+                $parking->getAvailableSpots()
+            );
+        }
 
         // Sauvegarde
         $this->reservationRepository->save($reservation);

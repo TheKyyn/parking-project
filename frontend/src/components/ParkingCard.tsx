@@ -39,8 +39,24 @@ export const ParkingCard = ({ parking, distance, onViewDetails }: ParkingCardPro
 
         <div className="flex items-center gap-2 text-sm">
           <ParkingCircle className="h-4 w-4 text-primary" />
-          <span className="font-medium">{parking.totalSpots} places</span>
+          <span className="font-medium">
+            {parking.availableSpots} / {parking.totalSpots} places disponibles
+          </span>
         </div>
+
+        {/* Low availability warning */}
+        {parking.availableSpots <= 5 && parking.availableSpots > 0 && (
+          <Badge variant="destructive" className="text-xs">
+            ⚠️ Seulement {parking.availableSpots} places restantes !
+          </Badge>
+        )}
+
+        {/* Full badge */}
+        {parking.availableSpots === 0 && (
+          <Badge variant="destructive" className="text-xs">
+            🚫 Complet
+          </Badge>
+        )}
       </CardContent>
 
       <CardFooter>

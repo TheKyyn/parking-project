@@ -59,6 +59,7 @@ export interface Parking {
   };
   hourlyRate: number;
   totalSpots: number;
+  availableSpots: number;
   createdAt?: string;
 }
 
@@ -67,6 +68,12 @@ export interface Reservation {
   id: string;
   userId: string;
   parkingId: string;
+  parking?: {
+    id: string;
+    name: string;
+    address: string;
+    hourlyRate: number;
+  };
   startTime: string;
   endTime: string;
   totalAmount: number;

@@ -17,6 +17,7 @@ class Parking
     private float $latitude;
     private float $longitude;
     private int $totalSpaces;
+    private int $availableSpots;
     private float $hourlyRate;
     private array $openingHours;
     private array $reservations;
@@ -31,6 +32,7 @@ class Parking
         float $latitude,
         float $longitude,
         int $totalSpaces,
+        int $availableSpots,
         float $hourlyRate,
         array $openingHours = [],
         ?\DateTimeImmutable $createdAt = null
@@ -39,6 +41,7 @@ class Parking
         $this->validateAddress($address);
         $this->validateCoordinates($latitude, $longitude);
         $this->validateTotalSpaces($totalSpaces);
+        $this->validateAvailableSpots($availableSpots, $totalSpaces);
         $this->validateHourlyRate($hourlyRate);
 
         $this->id = $id;
@@ -48,6 +51,7 @@ class Parking
         $this->latitude = $latitude;
         $this->longitude = $longitude;
         $this->totalSpaces = $totalSpaces;
+        $this->availableSpots = $availableSpots;
         $this->hourlyRate = $hourlyRate;
         $this->openingHours = $openingHours;
         $this->reservations = [];
@@ -88,6 +92,11 @@ class Parking
     public function getTotalSpaces(): int
     {
         return $this->totalSpaces;
+    }
+
+    public function getAvailableSpots(): int
+    {
+        return $this->availableSpots;
     }
 
     public function getHourlyRate(): float
@@ -142,6 +151,22 @@ class Parking
     {
         $this->validateAddress($newAddress);
         $this->address = trim($newAddress);
+    }
+
+    public function reserveSpot(): void
+    {
+        if ($this->availableSpots <= 0) {
+            throw new \DomainException('No available spots');
+        }
+        $this->availableSpots--;
+    }
+
+    public function releaseSpot(): void
+    {
+        if ($this->availableSpots >= $this->totalSpaces) {
+            throw new \DomainException('Cannot release more spots than total');
+        }
+        $this->availableSpots++;
     }
 
     public function getAvailableSpacesAt(\DateTimeInterface $dateTime): int
@@ -206,6 +231,17 @@ class Parking
     {
         if ($totalSpaces < 1) {
             throw new \InvalidArgumentException('Total spaces must be at least 1');
+        }
+    }
+
+    private function validateAvailableSpots(int $availableSpots, int $totalSpaces): void
+    {
+        if ($availableSpots < 0) {
+            throw new \InvalidArgumentException('Available spots cannot be negative');
+        }
+
+        if ($availableSpots > $totalSpaces) {
+            throw new \InvalidArgumentException('Available spots cannot exceed total spaces');
         }
     }
 

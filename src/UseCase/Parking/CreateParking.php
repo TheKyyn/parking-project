@@ -41,6 +41,7 @@ class CreateParking
             $request->latitude,
             $request->longitude,
             $request->totalSpaces,
+            $request->totalSpaces, // available_spots = total_spaces initially
             $request->hourlyRate,
             $request->openingHours
         );

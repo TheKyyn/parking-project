@@ -23,8 +23,8 @@ class MySQLParkingRepository implements ParkingRepositoryInterface
     {
         $pdo = $this->connection->getConnection();
 
-        $sql = 'INSERT INTO parkings (id, owner_id, name, address, latitude, longitude, total_spaces, hourly_rate, opening_hours, created_at)
-                VALUES (:id, :owner_id, :name, :address, :latitude, :longitude, :total_spaces, :hourly_rate, :opening_hours, :created_at)
+        $sql = 'INSERT INTO parkings (id, owner_id, name, address, latitude, longitude, total_spaces, available_spots, hourly_rate, opening_hours, created_at)
+                VALUES (:id, :owner_id, :name, :address, :latitude, :longitude, :total_spaces, :available_spots, :hourly_rate, :opening_hours, :created_at)
                 ON DUPLICATE KEY UPDATE
                 owner_id = VALUES(owner_id),
                 name = VALUES(name),
@@ -32,6 +32,7 @@ class MySQLParkingRepository implements ParkingRepositoryInterface
                 latitude = VALUES(latitude),
                 longitude = VALUES(longitude),
                 total_spaces = VALUES(total_spaces),
+                available_spots = VALUES(available_spots),
                 hourly_rate = VALUES(hourly_rate),
                 opening_hours = VALUES(opening_hours)';
 
@@ -44,6 +45,7 @@ class MySQLParkingRepository implements ParkingRepositoryInterface
             'latitude' => $parking->getLatitude(),
             'longitude' => $parking->getLongitude(),
             'total_spaces' => $parking->getTotalSpaces(),
+            'available_spots' => $parking->getAvailableSpots(),
             'hourly_rate' => $parking->getHourlyRate(),
             'opening_hours' => json_encode($parking->getOpeningHours()),
             'created_at' => $parking->getCreatedAt()->format('Y-m-d H:i:s')
@@ -242,9 +244,22 @@ class MySQLParkingRepository implements ParkingRepositoryInterface
             (float)$row['latitude'],
             (float)$row['longitude'],
             (int)$row['total_spaces'],
+            (int)($row['available_spots'] ?? $row['total_spaces']),
             (float)$row['hourly_rate'],
             $openingHoursFixed,
             new \DateTimeImmutable($row['created_at'])
         );
+    }
+
+    public function updateAvailableSpots(string $parkingId, int $availableSpots): void
+    {
+        $pdo = $this->connection->getConnection();
+
+        $sql = 'UPDATE parkings SET available_spots = :available_spots WHERE id = :id';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            'available_spots' => $availableSpots,
+            'id' => $parkingId
+        ]);
     }
 }

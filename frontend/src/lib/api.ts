@@ -126,6 +126,8 @@ export const reservationApi = {
 
   getById: (id: string) => api.get<Reservation>(`/api/reservations/${id}`),
 
+  getByOwner: () => api.get<Reservation[]>('/api/owner/reservations'),
+
   create: (data: { parkingId: string; startTime: string; endTime: string }) =>
     api.post<Reservation>('/api/reservations', data),
 

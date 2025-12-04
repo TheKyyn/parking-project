@@ -74,6 +74,12 @@ export interface Reservation {
     address: string;
     hourlyRate: number;
   };
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   startTime: string;
   endTime: string;
   totalAmount: number;

@@ -214,6 +214,25 @@ class MySQLReservationRepository implements ReservationRepositoryInterface
         return $this->findReservationsInTimeRange($from, $to);
     }
 
+    public function findByParkingIds(array $parkingIds): array
+    {
+        if (empty($parkingIds)) {
+            return [];
+        }
+
+        $pdo = $this->connection->getConnection();
+
+        $placeholders = implode(',', array_fill(0, count($parkingIds), '?'));
+
+        $stmt = $pdo->prepare("SELECT * FROM reservations
+                WHERE parking_id IN ($placeholders)
+                ORDER BY start_time DESC");
+
+        $stmt->execute($parkingIds);
+
+        return $this->fetchAllReservations($stmt);
+    }
+
     public function findExpiredReservations(): array
     {
         $pdo = $this->connection->getConnection();

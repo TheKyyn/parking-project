@@ -5,6 +5,8 @@ import * as z from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { parkingApi } from '@/lib/api';
 import type { Parking } from '@/types';
+import { OwnerCalendar } from '@/components/OwnerCalendar';
+import { AddressAutocomplete } from '@/components/AddressAutocomplete';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -243,46 +245,20 @@ export const OwnerDashboard = () => {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={createForm.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Adresse</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123 Rue de la Paix, 75001 Paris" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={createForm.control}
-                      name="latitude"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Latitude</FormLabel>
-                          <FormControl>
-                            <Input placeholder="48.8566" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  <div>
+                    <label className="text-sm font-medium">Adresse</label>
+                    <AddressAutocomplete
+                      value={createForm.watch('address')}
+                      onChange={(address, lat, lon) => {
+                        createForm.setValue('address', address);
+                        createForm.setValue('latitude', lat.toString());
+                        createForm.setValue('longitude', lon.toString());
+                      }}
+                      placeholder="Entrez l'adresse du parking..."
+                      showMap={true}
                     />
-                    <FormField
-                      control={createForm.control}
-                      name="longitude"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Longitude</FormLabel>
-                          <FormControl>
-                            <Input placeholder="2.3522" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <input type="hidden" {...createForm.register('latitude')} />
+                    <input type="hidden" {...createForm.register('longitude')} />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
@@ -448,46 +424,20 @@ export const OwnerDashboard = () => {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={editForm.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Adresse</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={editForm.control}
-                    name="latitude"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Latitude</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                <div>
+                  <label className="text-sm font-medium">Adresse</label>
+                  <AddressAutocomplete
+                    value={editForm.watch('address')}
+                    onChange={(address, lat, lon) => {
+                      editForm.setValue('address', address);
+                      editForm.setValue('latitude', lat.toString());
+                      editForm.setValue('longitude', lon.toString());
+                    }}
+                    placeholder="Entrez l'adresse du parking..."
+                    showMap={true}
                   />
-                  <FormField
-                    control={editForm.control}
-                    name="longitude"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Longitude</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <input type="hidden" {...editForm.register('latitude')} />
+                  <input type="hidden" {...editForm.register('longitude')} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -552,6 +502,13 @@ export const OwnerDashboard = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Owner Calendar */}
+        {!isLoading && parkings.length > 0 && (
+          <div className="mt-8">
+            <OwnerCalendar parkings={parkings} />
+          </div>
+        )}
       </div>
     </div>
   );

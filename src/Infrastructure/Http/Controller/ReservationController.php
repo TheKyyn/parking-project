@@ -21,7 +21,8 @@ class ReservationController
         private CreateReservation $createReservationUseCase,
         private CancelReservation $cancelReservationUseCase,
         private ReservationRepositoryInterface $reservationRepository,
-        private \ParkingSystem\Domain\Repository\ParkingRepositoryInterface $parkingRepository
+        private \ParkingSystem\Domain\Repository\ParkingRepositoryInterface $parkingRepository,
+        private \ParkingSystem\Domain\Repository\UserRepositoryInterface $userRepository
     ) {
     }
 
@@ -220,6 +221,67 @@ class ReservationController
             return JsonResponse::error($e->getMessage(), null, 400);
         } catch (\Exception $e) {
             return JsonResponse::serverError('An error occurred while cancelling reservation');
+        }
+    }
+
+    /**
+     * GET /api/owner/reservations - Liste toutes les réservations des parkings du propriétaire (owner auth)
+     */
+    public function ownerIndex(HttpRequestInterface $request): JsonResponse
+    {
+        try {
+            // Récupère l'ownerId depuis le middleware
+            $ownerId = $request->getPathParam('_ownerId');
+
+            if ($ownerId === null) {
+                return JsonResponse::unauthorized('Owner authentication required');
+            }
+
+            // Récupère tous les parkings du propriétaire
+            $parkings = $this->parkingRepository->findByOwnerId($ownerId);
+            $parkingIds = array_map(fn($p) => $p->getId(), $parkings);
+
+            if (empty($parkingIds)) {
+                return JsonResponse::success([], 'No parkings found for this owner');
+            }
+
+            // Récupère toutes les réservations pour ces parkings
+            $reservations = $this->reservationRepository->findByParkingIds($parkingIds);
+
+            // Formate la réponse avec données user et parking jointes
+            $reservationsArray = array_map(function ($reservation) {
+                $user = $this->userRepository->findById($reservation->getUserId());
+                $parking = $this->parkingRepository->findById($reservation->getParkingId());
+
+                return [
+                    'id' => $reservation->getId(),
+                    'userId' => $reservation->getUserId(),
+                    'parkingId' => $reservation->getParkingId(),
+                    'user' => $user ? [
+                        'id' => $user->getId(),
+                        'firstName' => $user->getFirstName(),
+                        'lastName' => $user->getLastName(),
+                        'email' => $user->getEmail(),
+                    ] : null,
+                    'parking' => $parking ? [
+                        'id' => $parking->getId(),
+                        'name' => $parking->getName(),
+                        'address' => $parking->getAddress(),
+                        'hourlyRate' => $parking->getHourlyRate(),
+                    ] : null,
+                    'startTime' => $reservation->getStartTime()->format('Y-m-d H:i:s'),
+                    'endTime' => $reservation->getEndTime()->format('Y-m-d H:i:s'),
+                    'totalAmount' => $reservation->getTotalAmount(),
+                    'status' => $reservation->getStatus(),
+                    'createdAt' => $reservation->getCreatedAt()->format('Y-m-d H:i:s'),
+                ];
+            }, $reservations);
+
+            return JsonResponse::success($reservationsArray, 'Owner reservations retrieved successfully');
+
+        } catch (\Exception $e) {
+            error_log('Error fetching owner reservations: ' . $e->getMessage());
+            return JsonResponse::serverError('An error occurred while retrieving owner reservations');
         }
     }
 }

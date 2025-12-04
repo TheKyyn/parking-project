@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { reservationApi } from '@/lib/api';
 import type { Reservation } from '@/types';
+import { UserCalendar } from '@/components/UserCalendar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -183,6 +184,13 @@ export const UserDashboard = () => {
                 )}
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* User Calendar */}
+        {!isLoading && reservations.length > 0 && (
+          <div className="mt-8">
+            <UserCalendar reservations={reservations} />
           </div>
         )}
       </div>

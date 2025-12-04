@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { format, parse, addHours, isAfter, isBefore, startOfDay } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Calendar } from '@/components/ui/calendar';
+import { format, parse, addHours, isAfter, isBefore } from 'date-fns';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -14,15 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { parkingApi, reservationApi } from '@/lib/api';
 import type { Parking } from '@/types';
-import { CalendarIcon, Clock, Euro, MapPin, AlertCircle, ParkingCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Clock, Euro, MapPin, AlertCircle, ParkingCircle } from 'lucide-react';
 
 // Generate time options (00:00 to 23:45 with 15min intervals)
 const generateTimeOptions = (): string[] => {
@@ -343,29 +337,15 @@ export const Reserve = () => {
               {/* Date Picker */}
               <div className="space-y-2">
                 <Label>Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !date && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, 'PPP', { locale: fr }) : 'Sélectionner une date'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      disabled={(date) => isBefore(date, startOfDay(new Date()))}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <div className="border rounded-lg overflow-hidden">
+                  <Calendar
+                    onChange={(value) => setDate(value as Date)}
+                    value={date}
+                    minDate={new Date()}
+                    locale="fr-FR"
+                    className="w-full"
+                  />
+                </div>
               </div>
 
               {/* Time Pickers */}

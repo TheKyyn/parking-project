@@ -189,7 +189,8 @@ return function (Router $router): void {
         $createReservationUseCase,
         $cancelReservationUseCase,
         $reservationRepository,
-        $parkingRepository
+        $parkingRepository,
+        $userRepository
     );
 
     $sessionController = new SessionController(
@@ -272,6 +273,11 @@ return function (Router $router): void {
     $router->delete('/api/reservations/:id', [$reservationController, 'cancel'])
         ->middleware($userAuthMiddleware)
         ->name('reservations.cancel');
+
+    // Reservation routes (owner-only)
+    $router->get('/api/owner/reservations', [$reservationController, 'ownerIndex'])
+        ->middleware($ownerAuthMiddleware)
+        ->name('reservations.owner.index');
 
     // Session routes (user-only)
     $router->post('/api/sessions', [$sessionController, 'start'])

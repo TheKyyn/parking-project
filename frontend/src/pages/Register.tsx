@@ -82,16 +82,17 @@ export const Register = () => {
               : await authApi.loginOwner({ email, password });
 
             if (loginResponse.success && loginResponse.data) {
+              const data = loginResponse.data as any;
               const userData = {
-                userId: loginResponse.data.userId,
-                ownerId: loginResponse.data.ownerId,
-                email: loginResponse.data.email,
-                firstName: loginResponse.data.firstName,
-                lastName: loginResponse.data.lastName,
-                name: loginResponse.data.name,
+                userId: data.userId,
+                ownerId: data.ownerId,
+                email: data.email,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                name: data.name,
               };
 
-              login(loginResponse.data.token, userType, userData);
+              login(data.token, userType, userData);
               navigate(userType === 'user' ? '/user/dashboard' : '/owner/dashboard');
             }
           } catch (loginErr) {

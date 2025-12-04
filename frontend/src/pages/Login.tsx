@@ -32,17 +32,18 @@ export const Login = () => {
 
       if (response.success && response.data) {
         // Extract user data from response
+        const data = response.data as any;
         const userData = {
-          userId: response.data.userId,
-          ownerId: response.data.ownerId,
-          email: response.data.email,
-          firstName: response.data.firstName,
-          lastName: response.data.lastName,
-          name: response.data.name,
+          userId: data.userId,
+          ownerId: data.ownerId,
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          name: data.name,
         };
 
         // Login via context
-        login(response.data.token, userType, userData);
+        login(data.token, userType, userData);
 
         // Redirect to appropriate dashboard
         navigate(userType === 'user' ? '/user/dashboard' : '/owner/dashboard');

@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Landing } from '@/pages/Landing';
 import { Login } from '@/pages/Login';
 import { Register } from '@/pages/Register';
+import { Parkings } from '@/pages/Parkings';
 import { UserDashboard } from '@/pages/UserDashboard';
 import { OwnerDashboard } from '@/pages/OwnerDashboard';
 import { NotFound } from '@/pages/NotFound';
@@ -37,6 +38,7 @@ function App() {
               <Route path="/" element={<HomeRedirect />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/parkings" element={<Parkings />} />
 
               {/* Protected routes - User */}
               <Route

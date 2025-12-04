@@ -7,6 +7,7 @@ namespace ParkingSystem\UseCase\Parking;
 use ParkingSystem\Domain\Entity\Parking;
 use ParkingSystem\Domain\Repository\ParkingRepositoryInterface;
 use ParkingSystem\Domain\Repository\ParkingOwnerRepositoryInterface;
+use ParkingSystem\UseCase\User\IdGeneratorInterface as UserIdGeneratorInterface;
 
 /**
  * CreateParking Use Case
@@ -17,7 +18,7 @@ class CreateParking
     public function __construct(
         private ParkingRepositoryInterface $parkingRepository,
         private ParkingOwnerRepositoryInterface $ownerRepository,
-        private IdGeneratorInterface $idGenerator
+        private UserIdGeneratorInterface $idGenerator
     ) {
     }
 
@@ -35,6 +36,8 @@ class CreateParking
         $parking = new Parking(
             $parkingId,
             $request->ownerId,
+            $request->name,
+            $request->address,
             $request->latitude,
             $request->longitude,
             $request->totalSpaces,
@@ -54,6 +57,8 @@ class CreateParking
         return new CreateParkingResponse(
             $parking->getId(),
             $parking->getOwnerId(),
+            $parking->getName(),
+            $parking->getAddress(),
             $parking->getLatitude(),
             $parking->getLongitude(),
             $parking->getTotalSpaces(),
@@ -66,6 +71,22 @@ class CreateParking
     {
         if (empty($request->ownerId)) {
             throw new \InvalidArgumentException('Owner ID is required');
+        }
+
+        if (empty(trim($request->name))) {
+            throw new \InvalidArgumentException('Name is required');
+        }
+
+        if (strlen(trim($request->name)) < 3) {
+            throw new \InvalidArgumentException('Name must be at least 3 characters');
+        }
+
+        if (empty(trim($request->address))) {
+            throw new \InvalidArgumentException('Address is required');
+        }
+
+        if (strlen(trim($request->address)) < 5) {
+            throw new \InvalidArgumentException('Address must be at least 5 characters');
         }
 
         if ($request->latitude < -90 || $request->latitude > 90) {

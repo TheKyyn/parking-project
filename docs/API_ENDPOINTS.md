@@ -115,6 +115,181 @@ Get the authenticated user's profile.
 
 ---
 
+## Parking Endpoints
+
+### GET /api/parkings
+List all parkings (or search with GPS coordinates).
+
+**Query Parameters (optional):**
+- `latitude` (float): GPS latitude for search
+- `longitude` (float): GPS longitude for search
+- `maxDistance` (float): Maximum distance in km (default: 5.0)
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Parkings retrieved successfully",
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "ownerId": "owner-uuid",
+      "name": "Parking Central",
+      "address": "123 Rue de la Paix, Paris",
+      "location": {
+        "latitude": 48.8566,
+        "longitude": 2.3522
+      },
+      "hourlyRate": 3.5,
+      "totalSpots": 50,
+      "createdAt": "2025-12-02 12:00:00"
+    }
+  ]
+}
+```
+
+---
+
+### GET /api/parkings/:id
+Get parking details by ID.
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Parking retrieved successfully",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "ownerId": "owner-uuid",
+    "name": "Parking Central",
+    "address": "123 Rue de la Paix, Paris",
+    "location": {
+      "latitude": 48.8566,
+      "longitude": 2.3522
+    },
+    "hourlyRate": 3.5,
+    "totalSpots": 50,
+    "createdAt": "2025-12-02 12:00:00"
+  }
+}
+```
+
+**Errors:**
+- `404` - Parking not found
+
+---
+
+### POST /api/parkings
+Create a new parking (owner only).
+
+**Authentication:** Required (JWT token with type='owner')
+
+**Request Body:**
+```json
+{
+  "name": "Parking Central",
+  "address": "123 Rue de la Paix, Paris",
+  "latitude": 48.8566,
+  "longitude": 2.3522,
+  "hourlyRate": 3.5,
+  "totalSpots": 50
+}
+```
+
+**Validation:**
+- `name`: required, minimum 3 characters
+- `address`: required, minimum 5 characters
+- `latitude`: required, between -90 and 90
+- `longitude`: required, between -180 and 180
+- `hourlyRate`: required, greater than 0
+- `totalSpots`: required, greater than 0
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Parking created successfully",
+  "data": {
+    "parkingId": "550e8400-e29b-41d4-a716-446655440000",
+    "ownerId": "owner-uuid",
+    "name": "Parking Central",
+    "address": "123 Rue de la Paix, Paris",
+    "location": {
+      "latitude": 48.8566,
+      "longitude": 2.3522
+    },
+    "hourlyRate": 3.5,
+    "totalSpots": 50,
+    "createdAt": "2025-12-02T12:00:00+00:00"
+  }
+}
+```
+
+**Errors:**
+- `401` - Authentication required
+- `403` - Not an owner account
+- `422` - Validation error
+
+---
+
+### PUT /api/parkings/:id
+Update a parking (owner only, must be the parking owner).
+
+**Authentication:** Required (JWT token with type='owner')
+
+**Request Body (all fields optional):**
+```json
+{
+  "name": "Parking Central Updated",
+  "address": "New Address",
+  "hourlyRate": 4.0,
+  "totalSpots": 60
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Parking updated successfully",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "ownerId": "owner-uuid",
+    "name": "Parking Central Updated",
+    "address": "New Address",
+    "location": {
+      "latitude": 48.8566,
+      "longitude": 2.3522
+    },
+    "hourlyRate": 4.0,
+    "totalSpots": 60,
+    "createdAt": "2025-12-02 12:00:00"
+  }
+}
+```
+
+**Errors:**
+- `401` - Authentication required
+- `403` - Not the parking owner
+- `404` - Parking not found
+- `422` - Validation error
+
+---
+
+### DELETE /api/parkings/:id
+Delete a parking (owner only, must be the parking owner).
+
+**Authentication:** Required (JWT token with type='owner')
+
+**Response (204 No Content)**
+
+**Errors:**
+- `401` - Authentication required
+- `403` - Not the parking owner
+- `404` - Parking not found
+
+---
+
 ## Error Response Format
 All error responses follow this format:
 

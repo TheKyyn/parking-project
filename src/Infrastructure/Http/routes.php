@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 use ParkingSystem\Infrastructure\Http\Routing\Router;
 use ParkingSystem\Infrastructure\Http\Controller\UserController;
+use ParkingSystem\Infrastructure\Http\Controller\ParkingController;
 use ParkingSystem\Infrastructure\Http\Middleware\AuthMiddleware;
 use ParkingSystem\Infrastructure\Http\Middleware\JwtAuthMiddleware;
+use ParkingSystem\Infrastructure\Http\Middleware\OwnerAuthMiddleware;
 use ParkingSystem\Infrastructure\Service\UuidGenerator;
 use ParkingSystem\Infrastructure\Service\BcryptPasswordHasher;
 use ParkingSystem\Infrastructure\Service\FirebaseJwtTokenGenerator;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLUserRepository;
+use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingRepository;
+use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingOwnerRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLConnection;
 use ParkingSystem\UseCase\User\CreateUser;
 use ParkingSystem\UseCase\User\AuthenticateUser;
+use ParkingSystem\UseCase\Parking\CreateParking;
+use ParkingSystem\UseCase\Parking\UpdateParking;
+use ParkingSystem\UseCase\Parking\DeleteParking;
 
 /**
  * Enregistre toutes les routes de l'application
@@ -47,6 +54,8 @@ return function (Router $router): void {
 
     // Repositories
     $userRepository = new MySQLUserRepository($dbConnection);
+    $parkingRepository = new MySQLParkingRepository($dbConnection);
+    $parkingOwnerRepository = new MySQLParkingOwnerRepository($dbConnection);
 
     // Services
     $idGenerator = new UuidGenerator();
@@ -67,6 +76,19 @@ return function (Router $router): void {
         $jwtGenerator
     );
 
+    $createParkingUseCase = new CreateParking(
+        $parkingRepository,
+        $parkingOwnerRepository,
+        $idGenerator
+    );
+
+    $updateParkingUseCase = new UpdateParking($parkingRepository);
+
+    $deleteParkingUseCase = new DeleteParking(
+        $parkingRepository,
+        $parkingOwnerRepository
+    );
+
     // Controllers
     $userController = new UserController(
         $createUserUseCase,
@@ -74,9 +96,17 @@ return function (Router $router): void {
         $userRepository
     );
 
+    $parkingController = new ParkingController(
+        $createParkingUseCase,
+        $updateParkingUseCase,
+        $deleteParkingUseCase,
+        $parkingRepository
+    );
+
     // Middleware
     $jwtAuthMiddleware = new JwtAuthMiddleware($jwtGenerator);
     $authMiddleware = new AuthMiddleware($jwtAuthMiddleware);
+    $ownerAuthMiddleware = new OwnerAuthMiddleware($jwtAuthMiddleware);
 
     // ==========================================
     // ROUTES
@@ -92,4 +122,25 @@ return function (Router $router): void {
     $router->get('/api/users/profile', [$userController, 'getProfile'])
         ->middleware($authMiddleware)
         ->name('users.profile');
+
+    // Parking routes
+    // Public routes
+    $router->get('/api/parkings', [$parkingController, 'list'])
+        ->name('parkings.list');
+
+    $router->get('/api/parkings/:id', [$parkingController, 'show'])
+        ->name('parkings.show');
+
+    // Owner-only routes
+    $router->post('/api/parkings', [$parkingController, 'create'])
+        ->middleware($ownerAuthMiddleware)
+        ->name('parkings.create');
+
+    $router->put('/api/parkings/:id', [$parkingController, 'update'])
+        ->middleware($ownerAuthMiddleware)
+        ->name('parkings.update');
+
+    $router->delete('/api/parkings/:id', [$parkingController, 'delete'])
+        ->middleware($ownerAuthMiddleware)
+        ->name('parkings.delete');
 };

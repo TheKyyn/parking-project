@@ -12,6 +12,8 @@ class CreateParkingRequest
 {
     public function __construct(
         public readonly string $ownerId,
+        public readonly string $name,
+        public readonly string $address,
         public readonly float $latitude,
         public readonly float $longitude,
         public readonly int $totalSpaces,

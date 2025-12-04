@@ -12,6 +12,8 @@ class Parking
 {
     private string $id;
     private string $ownerId;
+    private string $name;
+    private string $address;
     private float $latitude;
     private float $longitude;
     private int $totalSpaces;
@@ -24,6 +26,8 @@ class Parking
     public function __construct(
         string $id,
         string $ownerId,
+        string $name,
+        string $address,
         float $latitude,
         float $longitude,
         int $totalSpaces,
@@ -31,12 +35,16 @@ class Parking
         array $openingHours = [],
         ?\DateTimeImmutable $createdAt = null
     ) {
+        $this->validateName($name);
+        $this->validateAddress($address);
         $this->validateCoordinates($latitude, $longitude);
         $this->validateTotalSpaces($totalSpaces);
         $this->validateHourlyRate($hourlyRate);
-        
+
         $this->id = $id;
         $this->ownerId = $ownerId;
+        $this->name = trim($name);
+        $this->address = trim($address);
         $this->latitude = $latitude;
         $this->longitude = $longitude;
         $this->totalSpaces = $totalSpaces;
@@ -55,6 +63,16 @@ class Parking
     public function getOwnerId(): string
     {
         return $this->ownerId;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getAddress(): string
+    {
+        return $this->address;
     }
 
     public function getLatitude(): float
@@ -112,6 +130,18 @@ class Parking
     public function updateOpeningHours(array $newOpeningHours): void
     {
         $this->openingHours = $newOpeningHours;
+    }
+
+    public function updateName(string $newName): void
+    {
+        $this->validateName($newName);
+        $this->name = trim($newName);
+    }
+
+    public function updateAddress(string $newAddress): void
+    {
+        $this->validateAddress($newAddress);
+        $this->address = trim($newAddress);
     }
 
     public function getAvailableSpacesAt(\DateTimeInterface $dateTime): int
@@ -183,6 +213,28 @@ class Parking
     {
         if ($hourlyRate < 0) {
             throw new \InvalidArgumentException('Hourly rate cannot be negative');
+        }
+    }
+
+    private function validateName(string $name): void
+    {
+        if (empty(trim($name))) {
+            throw new \InvalidArgumentException('Name cannot be empty');
+        }
+
+        if (strlen(trim($name)) < 3) {
+            throw new \InvalidArgumentException('Name must be at least 3 characters');
+        }
+    }
+
+    private function validateAddress(string $address): void
+    {
+        if (empty(trim($address))) {
+            throw new \InvalidArgumentException('Address cannot be empty');
+        }
+
+        if (strlen(trim($address)) < 5) {
+            throw new \InvalidArgumentException('Address must be at least 5 characters');
         }
     }
 }

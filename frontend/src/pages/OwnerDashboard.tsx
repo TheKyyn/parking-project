@@ -51,7 +51,7 @@ const parkingSchema = z.object({
 type ParkingFormData = z.infer<typeof parkingSchema>;
 
 export const OwnerDashboard = () => {
-  const { user: _user } = useAuth(); // TODO: Use _user.ownerId to filter parkings by owner
+  const { user } = useAuth();
   const [parkings, setParkings] = useState<Parking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -200,7 +200,14 @@ export const OwnerDashboard = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Dashboard Propriétaire</h1>
+            <h1 className="text-3xl font-bold mb-2">
+              Dashboard Propriétaire
+              {user && (user as any).firstName && (
+                <span className="text-muted-foreground ml-3">
+                  - {(user as any).firstName} {(user as any).lastName}
+                </span>
+              )}
+            </h1>
             <p className="text-muted-foreground">
               Gérez vos parkings et suivez vos revenus
             </p>

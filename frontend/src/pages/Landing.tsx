@@ -60,7 +60,7 @@ export const Landing = () => {
                 <DollarSign className="h-12 w-12 mx-auto mb-4 text-blue-600" />
                 <h3 className="text-xl font-semibold mb-2">Prix transparents</h3>
                 <p className="text-gray-600">
-                  Tarification claire par tranches de 15 minutes. Pas de frais cachés.
+                  Tarification claire au tarif horaire. Pas de frais cachés.
                 </p>
               </CardContent>
             </Card>

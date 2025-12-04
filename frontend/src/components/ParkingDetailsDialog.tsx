@@ -67,7 +67,7 @@ export const ParkingDetailsDialog = ({
                 {parking.hourlyRate.toFixed(2)}€ / heure
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Facturation par tranches de 15 minutes
+                Facturation au tarif horaire complet
               </p>
             </div>
           </div>

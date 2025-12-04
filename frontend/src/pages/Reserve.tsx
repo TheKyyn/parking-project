@@ -419,7 +419,7 @@ export const Reserve = () => {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Facturation par tranches de 15 minutes
+                      Facturation au tarif horaire
                     </p>
                   </CardContent>
                 </Card>

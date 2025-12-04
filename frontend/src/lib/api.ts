@@ -89,11 +89,33 @@ export const parkingApi = {
 
   getById: (id: string) => api.get<Parking>(`/api/parkings/${id}`),
 
-  create: (data: Omit<Parking, 'id' | 'ownerId' | 'createdAt'>) =>
-    api.post<Parking>('/api/parkings', data),
+  create: (data: Omit<Parking, 'id' | 'ownerId' | 'createdAt'>) => {
+    // Transform nested location to flat structure for backend
+    const payload = {
+      name: data.name,
+      address: data.address,
+      latitude: data.location.latitude,
+      longitude: data.location.longitude,
+      hourlyRate: data.hourlyRate,
+      totalSpots: data.totalSpots,
+    };
+    return api.post<Parking>('/api/parkings', payload);
+  },
 
-  update: (id: string, data: Partial<Omit<Parking, 'id' | 'ownerId' | 'createdAt'>>) =>
-    api.put<Parking>(`/api/parkings/${id}`, data),
+  update: (id: string, data: Partial<Omit<Parking, 'id' | 'ownerId' | 'createdAt'>>) => {
+    // Transform nested location to flat structure for backend
+    const payload: Record<string, any> = {
+      name: data.name,
+      address: data.address,
+      hourlyRate: data.hourlyRate,
+      totalSpots: data.totalSpots,
+    };
+    if (data.location) {
+      payload.latitude = data.location.latitude;
+      payload.longitude = data.location.longitude;
+    }
+    return api.put<Parking>(`/api/parkings/${id}`, payload);
+  },
 
   delete: (id: string) => api.delete(`/api/parkings/${id}`),
 };

@@ -23,13 +23,16 @@ class MySQLParkingRepository implements ParkingRepositoryInterface
     {
         $pdo = $this->connection->getConnection();
 
-        $sql = 'INSERT INTO parkings (id, owner_id, latitude, longitude, total_spaces, hourly_rate, opening_hours, created_at)
-                VALUES (:id, :owner_id, :latitude, :longitude, :total_spaces, :hourly_rate, :opening_hours, :created_at)
+        $sql = 'INSERT INTO parkings (id, owner_id, name, address, latitude, longitude, total_spaces, available_spots, hourly_rate, opening_hours, created_at)
+                VALUES (:id, :owner_id, :name, :address, :latitude, :longitude, :total_spaces, :available_spots, :hourly_rate, :opening_hours, :created_at)
                 ON DUPLICATE KEY UPDATE
                 owner_id = VALUES(owner_id),
+                name = VALUES(name),
+                address = VALUES(address),
                 latitude = VALUES(latitude),
                 longitude = VALUES(longitude),
                 total_spaces = VALUES(total_spaces),
+                available_spots = VALUES(available_spots),
                 hourly_rate = VALUES(hourly_rate),
                 opening_hours = VALUES(opening_hours)';
 
@@ -37,9 +40,12 @@ class MySQLParkingRepository implements ParkingRepositoryInterface
         $stmt->execute([
             'id' => $parking->getId(),
             'owner_id' => $parking->getOwnerId(),
+            'name' => $parking->getName(),
+            'address' => $parking->getAddress(),
             'latitude' => $parking->getLatitude(),
             'longitude' => $parking->getLongitude(),
             'total_spaces' => $parking->getTotalSpaces(),
+            'available_spots' => $parking->getAvailableSpots(),
             'hourly_rate' => $parking->getHourlyRate(),
             'opening_hours' => json_encode($parking->getOpeningHours()),
             'created_at' => $parking->getCreatedAt()->format('Y-m-d H:i:s')
@@ -171,6 +177,56 @@ class MySQLParkingRepository implements ParkingRepositoryInterface
         return $parkings;
     }
 
+    public function findAvailableAt(\DateTimeInterface $dateTime, int $limit = 10): array
+    {
+        // Simple implementation - can be enhanced later
+        return array_slice($this->findAll(), 0, $limit);
+    }
+
+    public function findByMinimumSpaces(int $minimumSpaces): array
+    {
+        $pdo = $this->connection->getConnection();
+
+        $stmt = $pdo->prepare('SELECT * FROM parkings WHERE total_spaces >= :min_spaces ORDER BY total_spaces DESC');
+        $stmt->execute(['min_spaces' => $minimumSpaces]);
+
+        $parkings = [];
+        while ($row = $stmt->fetch()) {
+            $parkings[] = $this->hydrateParking($row);
+        }
+
+        return $parkings;
+    }
+
+    public function findByRateRange(float $minRate, float $maxRate): array
+    {
+        $pdo = $this->connection->getConnection();
+
+        $stmt = $pdo->prepare('SELECT * FROM parkings WHERE hourly_rate BETWEEN :min_rate AND :max_rate ORDER BY hourly_rate ASC');
+        $stmt->execute(['min_rate' => $minRate, 'max_rate' => $maxRate]);
+
+        $parkings = [];
+        while ($row = $stmt->fetch()) {
+            $parkings[] = $this->hydrateParking($row);
+        }
+
+        return $parkings;
+    }
+
+    public function findMostPopular(int $limit = 10): array
+    {
+        // Simple implementation - returns most recent parkings
+        // Can be enhanced later with popularity metrics
+        return array_slice($this->findAll(), 0, $limit);
+    }
+
+    public function searchByCriteria(array $criteria): array
+    {
+        // Simple implementation - returns all parkings
+        // Can be enhanced later with complex search logic
+        return $this->findAll();
+    }
+
     private function hydrateParking(array $row): Parking
     {
         $openingHours = json_decode($row['opening_hours'] ?? '[]', true);
@@ -183,12 +239,27 @@ class MySQLParkingRepository implements ParkingRepositoryInterface
         return new Parking(
             $row['id'],
             $row['owner_id'],
+            $row['name'] ?? '',
+            $row['address'] ?? '',
             (float)$row['latitude'],
             (float)$row['longitude'],
             (int)$row['total_spaces'],
+            (int)($row['available_spots'] ?? $row['total_spaces']),
             (float)$row['hourly_rate'],
             $openingHoursFixed,
             new \DateTimeImmutable($row['created_at'])
         );
+    }
+
+    public function updateAvailableSpots(string $parkingId, int $availableSpots): void
+    {
+        $pdo = $this->connection->getConnection();
+
+        $sql = 'UPDATE parkings SET available_spots = :available_spots WHERE id = :id';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            'available_spots' => $availableSpots,
+            'id' => $parkingId
+        ]);
     }
 }

@@ -12,9 +12,12 @@ class Parking
 {
     private string $id;
     private string $ownerId;
+    private string $name;
+    private string $address;
     private float $latitude;
     private float $longitude;
     private int $totalSpaces;
+    private int $availableSpots;
     private float $hourlyRate;
     private array $openingHours;
     private array $reservations;
@@ -24,22 +27,31 @@ class Parking
     public function __construct(
         string $id,
         string $ownerId,
+        string $name,
+        string $address,
         float $latitude,
         float $longitude,
         int $totalSpaces,
+        int $availableSpots,
         float $hourlyRate,
         array $openingHours = [],
         ?\DateTimeImmutable $createdAt = null
     ) {
+        $this->validateName($name);
+        $this->validateAddress($address);
         $this->validateCoordinates($latitude, $longitude);
         $this->validateTotalSpaces($totalSpaces);
+        $this->validateAvailableSpots($availableSpots, $totalSpaces);
         $this->validateHourlyRate($hourlyRate);
-        
+
         $this->id = $id;
         $this->ownerId = $ownerId;
+        $this->name = trim($name);
+        $this->address = trim($address);
         $this->latitude = $latitude;
         $this->longitude = $longitude;
         $this->totalSpaces = $totalSpaces;
+        $this->availableSpots = $availableSpots;
         $this->hourlyRate = $hourlyRate;
         $this->openingHours = $openingHours;
         $this->reservations = [];
@@ -57,6 +69,16 @@ class Parking
         return $this->ownerId;
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getAddress(): string
+    {
+        return $this->address;
+    }
+
     public function getLatitude(): float
     {
         return $this->latitude;
@@ -70,6 +92,11 @@ class Parking
     public function getTotalSpaces(): int
     {
         return $this->totalSpaces;
+    }
+
+    public function getAvailableSpots(): int
+    {
+        return $this->availableSpots;
     }
 
     public function getHourlyRate(): float
@@ -112,6 +139,34 @@ class Parking
     public function updateOpeningHours(array $newOpeningHours): void
     {
         $this->openingHours = $newOpeningHours;
+    }
+
+    public function updateName(string $newName): void
+    {
+        $this->validateName($newName);
+        $this->name = trim($newName);
+    }
+
+    public function updateAddress(string $newAddress): void
+    {
+        $this->validateAddress($newAddress);
+        $this->address = trim($newAddress);
+    }
+
+    public function reserveSpot(): void
+    {
+        if ($this->availableSpots <= 0) {
+            throw new \DomainException('No available spots');
+        }
+        $this->availableSpots--;
+    }
+
+    public function releaseSpot(): void
+    {
+        if ($this->availableSpots >= $this->totalSpaces) {
+            throw new \DomainException('Cannot release more spots than total');
+        }
+        $this->availableSpots++;
     }
 
     public function getAvailableSpacesAt(\DateTimeInterface $dateTime): int
@@ -179,10 +234,43 @@ class Parking
         }
     }
 
+    private function validateAvailableSpots(int $availableSpots, int $totalSpaces): void
+    {
+        if ($availableSpots < 0) {
+            throw new \InvalidArgumentException('Available spots cannot be negative');
+        }
+
+        if ($availableSpots > $totalSpaces) {
+            throw new \InvalidArgumentException('Available spots cannot exceed total spaces');
+        }
+    }
+
     private function validateHourlyRate(float $hourlyRate): void
     {
         if ($hourlyRate < 0) {
             throw new \InvalidArgumentException('Hourly rate cannot be negative');
+        }
+    }
+
+    private function validateName(string $name): void
+    {
+        if (empty(trim($name))) {
+            throw new \InvalidArgumentException('Name cannot be empty');
+        }
+
+        if (strlen(trim($name)) < 3) {
+            throw new \InvalidArgumentException('Name must be at least 3 characters');
+        }
+    }
+
+    private function validateAddress(string $address): void
+    {
+        if (empty(trim($address))) {
+            throw new \InvalidArgumentException('Address cannot be empty');
+        }
+
+        if (strlen(trim($address)) < 5) {
+            throw new \InvalidArgumentException('Address must be at least 5 characters');
         }
     }
 }

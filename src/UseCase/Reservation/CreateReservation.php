@@ -43,7 +43,14 @@ class CreateReservation
         // Check if parking is open during reservation period
         $this->validateParkingOpenHours($parking, $request->startTime, $request->endTime);
 
-        // Check availability
+        // Check real-time availability
+        if ($parking->getAvailableSpots() <= 0) {
+            throw new NoAvailableSpaceException(
+                'No available spots in this parking'
+            );
+        }
+
+        // Check availability conflicts
         if (!$this->conflictChecker->hasAvailableSpacesDuring(
             $request->parkingId,
             $request->startTime,
@@ -63,7 +70,7 @@ class CreateReservation
 
         // Create reservation
         $reservationId = $this->idGenerator->generate();
-        
+
         $reservation = new Reservation(
             $reservationId,
             $request->userId,
@@ -75,6 +82,13 @@ class CreateReservation
 
         // Confirm reservation immediately
         $reservation->confirm();
+
+        // Decrement available spots
+        $parking->reserveSpot();
+        $this->parkingRepository->updateAvailableSpots(
+            $parking->getId(),
+            $parking->getAvailableSpots()
+        );
 
         // Save reservation
         $this->reservationRepository->save($reservation);
@@ -102,7 +116,7 @@ class CreateReservation
         }
 
         $now = new \DateTimeImmutable();
-        
+
         if ($request->startTime < $now) {
             throw new InvalidReservationTimeException(
                 'Reservation start time cannot be in the past'
@@ -127,9 +141,9 @@ class CreateReservation
         }
 
         // Minimum reservation duration: 15 minutes
-        $durationMinutes = ($request->endTime->getTimestamp() - 
+        $durationMinutes = ($request->endTime->getTimestamp() -
                            $request->startTime->getTimestamp()) / 60;
-        
+
         if ($durationMinutes < 15) {
             throw new InvalidReservationTimeException(
                 'Minimum reservation duration is 15 minutes'
@@ -156,7 +170,7 @@ class CreateReservation
         // For multi-day reservations, check each day
         $current = \DateTimeImmutable::createFromInterface($startTime);
         $end = \DateTimeImmutable::createFromInterface($endTime);
-        
+
         while ($current < $end) {
             if (!$parking->isOpenAt($current)) {
                 throw new InvalidReservationTimeException(

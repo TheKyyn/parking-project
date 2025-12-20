@@ -133,6 +133,39 @@ class MySQLParkingOwnerRepository implements ParkingOwnerRepositoryInterface
         return $owners;
     }
 
+    public function emailExists(string $email): bool
+    {
+        $pdo = $this->connection->getConnection();
+
+        $stmt = $pdo->prepare('SELECT 1 FROM parking_owners WHERE email = :email');
+        $stmt->execute(['email' => strtolower($email)]);
+
+        return $stmt->fetch() !== false;
+    }
+
+    public function findRecentlyCreated(int $limit = 10): array
+    {
+        $pdo = $this->connection->getConnection();
+
+        $stmt = $pdo->prepare('SELECT * FROM parking_owners ORDER BY created_at DESC LIMIT :limit');
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $owners = [];
+        while ($row = $stmt->fetch()) {
+            $owners[] = $this->hydrateOwner($row);
+        }
+
+        return $owners;
+    }
+
+    public function findWithMostParkings(int $limit = 10): array
+    {
+        // Simple implementation - returns all owners
+        // Can be enhanced later with JOIN on parkings table
+        return array_slice($this->findAll(), 0, $limit);
+    }
+
     private function hydrateOwner(array $row): ParkingOwner
     {
         return new ParkingOwner(

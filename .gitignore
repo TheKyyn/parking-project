@@ -1,0 +1,40 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Vendor dependencies
+/vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+/logs/
+*.log
+
+# Composer
+composer.lock
+composer.phar
+
+# PHPUnit
+.phpunit.result.cache
+/phpunit.xml
+
+# Cache
+/cache/
+/tmp/
+
+# Documentation Markdown (ne pas push)
+*.md
+!README.md
+
+# Server PID
+.server.pid
+
+# Test data
+/tests/_output/

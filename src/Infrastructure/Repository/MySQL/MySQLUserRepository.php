@@ -133,6 +133,32 @@ class MySQLUserRepository implements UserRepositoryInterface
         return $users;
     }
 
+    public function emailExists(string $email): bool
+    {
+        $pdo = $this->connection->getConnection();
+
+        $stmt = $pdo->prepare('SELECT 1 FROM users WHERE email = :email');
+        $stmt->execute(['email' => strtolower($email)]);
+
+        return $stmt->fetch() !== false;
+    }
+
+    public function findRecentlyCreated(int $limit = 10): array
+    {
+        $pdo = $this->connection->getConnection();
+
+        $stmt = $pdo->prepare('SELECT * FROM users ORDER BY created_at DESC LIMIT :limit');
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $users = [];
+        while ($row = $stmt->fetch()) {
+            $users[] = $this->hydrateUser($row);
+        }
+
+        return $users;
+    }
+
     private function hydrateUser(array $row): User
     {
         return new User(

@@ -20,7 +20,7 @@ class UpdateParking
     public function execute(UpdateParkingRequest $request): void
     {
         $parking = $this->parkingRepository->findById($request->parkingId);
-        
+
         if ($parking === null) {
             throw new ParkingNotFoundException('Parking not found: ' . $request->parkingId);
         }
@@ -33,6 +33,16 @@ class UpdateParking
         }
 
         // Update fields if provided
+        if ($request->name !== null) {
+            $this->validateName($request->name);
+            $parking->updateName($request->name);
+        }
+
+        if ($request->address !== null) {
+            $this->validateAddress($request->address);
+            $parking->updateAddress($request->address);
+        }
+
         if ($request->totalSpaces !== null) {
             $this->validateTotalSpaces($request->totalSpaces);
             $parking->updateTotalSpaces($request->totalSpaces);
@@ -87,6 +97,28 @@ class UpdateParking
             if ($hours['open'] >= $hours['close']) {
                 throw new \InvalidArgumentException('Open time must be before close time');
             }
+        }
+    }
+
+    private function validateName(string $name): void
+    {
+        if (empty(trim($name))) {
+            throw new \InvalidArgumentException('Name cannot be empty');
+        }
+
+        if (strlen(trim($name)) < 3) {
+            throw new \InvalidArgumentException('Name must be at least 3 characters');
+        }
+    }
+
+    private function validateAddress(string $address): void
+    {
+        if (empty(trim($address))) {
+            throw new \InvalidArgumentException('Address cannot be empty');
+        }
+
+        if (strlen(trim($address)) < 5) {
+            throw new \InvalidArgumentException('Address must be at least 5 characters');
         }
     }
 }

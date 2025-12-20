@@ -51,7 +51,7 @@ class ListUnauthorizedUsersTest extends TestCase
         // Arrange
         $request = new ListUnauthorizedUsersRequest('parking-456');
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository
             ->expects($this->once())
@@ -79,7 +79,7 @@ class ListUnauthorizedUsersTest extends TestCase
         $checkTime = new \DateTimeImmutable('2025-01-15 14:00:00');
         $request = new ListUnauthorizedUsersRequest('parking-456', $checkTime);
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
 
@@ -121,7 +121,7 @@ class ListUnauthorizedUsersTest extends TestCase
         $checkTime = new \DateTimeImmutable('2025-01-15 10:00:00');
         $request = new ListUnauthorizedUsersRequest('parking-456', $checkTime);
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
 
@@ -158,7 +158,7 @@ class ListUnauthorizedUsersTest extends TestCase
         $checkTime = new \DateTimeImmutable('2025-01-15 10:00:00');
         $request = new ListUnauthorizedUsersRequest('parking-456', $checkTime);
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
 

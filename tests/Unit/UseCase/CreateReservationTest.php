@@ -71,8 +71,11 @@ class CreateReservationTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner-789',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0 // €15/hour
         );
@@ -116,6 +119,11 @@ class CreateReservationTest extends TestCase
                        $reservation->getTotalAmount() === 30.0 &&
                        $reservation->getStatus() === 'confirmed';
             }));
+
+        $this->parkingRepository
+            ->expects($this->once())
+            ->method('updateAvailableSpots')
+            ->with('parking-456', 19);
 
         // Act
         $response = $this->createReservation->execute($request);
@@ -163,7 +171,7 @@ class CreateReservationTest extends TestCase
 
         $this->userRepository->method('exists')->willReturn(true);
         $this->parkingRepository->method('findById')
-            ->willReturn(new Parking('parking-456', 'owner', 48.8566, 2.3522, 10, 15.0));
+            ->willReturn(new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 10, 10, 15.0));
 
         $this->conflictChecker
             ->expects($this->once())
@@ -240,8 +248,11 @@ class CreateReservationTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner-789',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0,
             [
@@ -271,7 +282,7 @@ class CreateReservationTest extends TestCase
         
         $request = new CreateReservationRequest('user-123', 'parking-456', $startTime, $endTime);
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->userRepository->method('exists')->willReturn(true);
         $this->parkingRepository->method('findById')->willReturn($parking);
@@ -286,6 +297,7 @@ class CreateReservationTest extends TestCase
             ->willReturn(22.5); // 1.5 hours * €15
 
         $this->reservationRepository->expects($this->once())->method('save');
+        $this->parkingRepository->expects($this->once())->method('updateAvailableSpots');
 
         // Act
         $response = $this->createReservation->execute($request);

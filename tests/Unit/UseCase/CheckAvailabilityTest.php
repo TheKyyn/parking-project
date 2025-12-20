@@ -56,9 +56,12 @@ class CheckAvailabilityTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner-789',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
             20, // 20 total spaces
+            20,
             15.0
         );
 
@@ -101,7 +104,7 @@ class CheckAvailabilityTest extends TestCase
         $checkTime = new \DateTimeImmutable('2025-01-15 10:00:00');
         $request = new CheckAvailabilityRequest('parking-456', $checkTime);
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
 
@@ -152,8 +155,11 @@ class CheckAvailabilityTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0,
             [
@@ -185,8 +191,11 @@ class CheckAvailabilityTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0,
             [

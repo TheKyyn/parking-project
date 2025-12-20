@@ -36,6 +36,7 @@ use ParkingSystem\UseCase\Parking\UpdateParking;
 use ParkingSystem\UseCase\Parking\DeleteParking;
 use ParkingSystem\UseCase\Reservation\CreateReservation;
 use ParkingSystem\UseCase\Reservation\CancelReservation;
+use ParkingSystem\UseCase\Reservation\GenerateInvoice;
 use ParkingSystem\UseCase\Session\EnterParking;
 use ParkingSystem\UseCase\Session\ExitParking;
 
@@ -147,6 +148,13 @@ return function (Router $router): void {
         $parkingRepository
     );
 
+    $generateInvoiceUseCase = new GenerateInvoice(
+        $reservationRepository,
+        $parkingRepository,
+        $userRepository,
+        $sessionRepository
+    );
+
     $enterParkingUseCase = new EnterParking(
         $sessionRepository,
         $parkingRepository,
@@ -188,9 +196,11 @@ return function (Router $router): void {
     $reservationController = new ReservationController(
         $createReservationUseCase,
         $cancelReservationUseCase,
+        $generateInvoiceUseCase,
         $reservationRepository,
         $parkingRepository,
-        $userRepository
+        $userRepository,
+        $sessionRepository
     );
 
     $sessionController = new SessionController(
@@ -273,6 +283,10 @@ return function (Router $router): void {
     $router->delete('/api/reservations/:id', [$reservationController, 'cancel'])
         ->middleware($userAuthMiddleware)
         ->name('reservations.cancel');
+
+    $router->get('/api/reservations/:id/invoice', [$reservationController, 'invoice'])
+        ->middleware($userAuthMiddleware)
+        ->name('reservations.invoice');
 
     // Reservation routes (owner-only)
     $router->get('/api/owner/reservations', [$reservationController, 'ownerIndex'])

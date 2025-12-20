@@ -59,8 +59,11 @@ class ValidateSubscriptionSlotsTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner-789',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0
         );
@@ -109,7 +112,7 @@ class ValidateSubscriptionSlotsTest extends TestCase
             3
         );
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
 
@@ -151,8 +154,11 @@ class ValidateSubscriptionSlotsTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0,
             [
@@ -255,7 +261,7 @@ class ValidateSubscriptionSlotsTest extends TestCase
             3
         );
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
 

@@ -57,8 +57,16 @@ interface ReservationRepositoryInterface
     public function findExpiredReservations(): array;
 
     public function getTotalRevenueForParking(
-        string $parkingId, 
-        ?\DateTimeInterface $from = null, 
+        string $parkingId,
+        ?\DateTimeInterface $from = null,
         ?\DateTimeInterface $to = null
     ): float;
+
+    /**
+     * Find reservations for multiple parkings
+     *
+     * @param array $parkingIds Array of parking IDs
+     * @return Reservation[]
+     */
+    public function findByParkingIds(array $parkingIds): array;
 }

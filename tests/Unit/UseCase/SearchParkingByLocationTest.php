@@ -49,17 +49,23 @@ class SearchParkingByLocationTest extends TestCase
         $closerParking = new Parking(
             'parking-close',
             'owner-1',
+            'Close Parking',
+            'Address Close 12345',
             48.8570, // Closer
             2.3525,
+            10,
             10,
             15.0
         );
 
         $fartherParking = new Parking(
             'parking-far',
-            'owner-2', 
+            'owner-2',
+            'Far Parking',
+            'Address Far 12345',
             48.8600, // Farther
             2.3600,
+            20,
             20,
             12.0
         );
@@ -113,8 +119,11 @@ class SearchParkingByLocationTest extends TestCase
         $closedParking = new Parking(
             'parking-closed',
             'owner-1',
+            'Closed Parking',
+            'Test Address 12345',
             48.8570,
             2.3525,
+            10,
             10,
             15.0,
             [1 => ['open' => '08:00', 'close' => '18:00']] // Only open Monday 8-18
@@ -147,7 +156,7 @@ class SearchParkingByLocationTest extends TestCase
             minimumSpaces: 2
         );
 
-        $parking = new Parking('parking-1', 'owner-1', 48.8570, 2.3525, 10, 15.0);
+        $parking = new Parking('parking-1', 'owner-1', 'Test Parking', 'Test Address 12345', 48.8570, 2.3525, 10, 10, 15.0);
 
         $this->parkingRepository
             ->method('findNearLocation')
@@ -177,8 +186,8 @@ class SearchParkingByLocationTest extends TestCase
             maxHourlyRate: 10.0
         );
 
-        $cheapParking = new Parking('cheap', 'owner-1', 48.8570, 2.3525, 10, 8.0);
-        $expensiveParking = new Parking('expensive', 'owner-2', 48.8575, 2.3530, 10, 15.0);
+        $cheapParking = new Parking('cheap', 'owner-1', 'Cheap Parking', 'Test Address 12345', 48.8570, 2.3525, 10, 10, 8.0);
+        $expensiveParking = new Parking('expensive', 'owner-2', 'Expensive Parking', 'Test Address 12345', 48.8575, 2.3530, 10, 10, 15.0);
 
         $this->parkingRepository
             ->method('findNearLocation')
@@ -233,8 +242,8 @@ class SearchParkingByLocationTest extends TestCase
         // Arrange
         $request = new SearchParkingByLocationRequest(48.8566, 2.3522, 5.0, limit: 1);
 
-        $parking1 = new Parking('p1', 'o1', 48.8570, 2.3525, 10, 15.0);
-        $parking2 = new Parking('p2', 'o2', 48.8580, 2.3535, 10, 15.0);
+        $parking1 = new Parking('p1', 'o1', 'Parking 1', 'Test Address 12345', 48.8570, 2.3525, 10, 10, 15.0);
+        $parking2 = new Parking('p2', 'o2', 'Parking 2', 'Test Address 12345', 48.8580, 2.3535, 10, 10, 15.0);
 
         $this->parkingRepository
             ->method('findNearLocation')

@@ -59,8 +59,11 @@ class GetParkingStatisticsTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner-789',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0
         );
@@ -108,7 +111,7 @@ class GetParkingStatisticsTest extends TestCase
             new \DateTimeImmutable()
         );
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
         $this->reservationRepository->method('findByParkingId')->willReturn([]);
@@ -134,7 +137,7 @@ class GetParkingStatisticsTest extends TestCase
         // Arrange
         $request = new GetParkingStatisticsRequest('parking-456');
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
         $this->reservationRepository->method('findByParkingId')->willReturn([]);
@@ -226,7 +229,7 @@ class GetParkingStatisticsTest extends TestCase
         // Arrange
         $request = new GetParkingStatisticsRequest('parking-456');
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
         $this->reservationRepository->method('findByParkingId')->willReturn([]);
@@ -247,7 +250,7 @@ class GetParkingStatisticsTest extends TestCase
         // Arrange
         $request = new GetParkingStatisticsRequest('parking-456');
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->parkingRepository->method('findById')->willReturn($parking);
         $this->reservationRepository->method('findByParkingId')->willReturn([]);

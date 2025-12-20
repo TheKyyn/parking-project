@@ -78,8 +78,11 @@ class CreateSubscriptionTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner-789',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0
         );
@@ -203,7 +206,7 @@ class CreateSubscriptionTest extends TestCase
             new \DateTimeImmutable('tomorrow')
         );
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $existingSubscription = new Subscription(
             'sub-existing',
@@ -241,7 +244,7 @@ class CreateSubscriptionTest extends TestCase
             new \DateTimeImmutable('tomorrow')
         );
 
-        $parking = new Parking('parking-456', 'owner', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->userRepository->method('exists')->willReturn(true);
         $this->parkingRepository->method('findById')->willReturn($parking);
@@ -382,8 +385,11 @@ class CreateSubscriptionTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0,
             [

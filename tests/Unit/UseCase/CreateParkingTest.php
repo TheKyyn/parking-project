@@ -9,7 +9,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ParkingSystem\UseCase\Parking\CreateParking;
 use ParkingSystem\UseCase\Parking\CreateParkingRequest;
 use ParkingSystem\UseCase\Parking\CreateParkingResponse;
-use ParkingSystem\UseCase\Parking\IdGeneratorInterface;
+use ParkingSystem\UseCase\User\IdGeneratorInterface;
 use ParkingSystem\UseCase\Parking\OwnerNotFoundException;
 use ParkingSystem\Domain\Repository\ParkingRepositoryInterface;
 use ParkingSystem\Domain\Repository\ParkingOwnerRepositoryInterface;
@@ -50,6 +50,8 @@ class CreateParkingTest extends TestCase
         
         $request = new CreateParkingRequest(
             'owner-123',
+            'Test Parking Lot',
+            'Test Address 12345',
             48.8566,
             2.3522,
             50,
@@ -119,6 +121,8 @@ class CreateParkingTest extends TestCase
         // Arrange
         $request = new CreateParkingRequest(
             'nonexistent-owner',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
             50,
@@ -143,6 +147,8 @@ class CreateParkingTest extends TestCase
         // Arrange
         $request = new CreateParkingRequest(
             'owner-123',
+            'Test Parking',
+            'Test Address 12345',
             91.0, // Invalid latitude
             2.3522,
             50,
@@ -165,6 +171,8 @@ class CreateParkingTest extends TestCase
         
         $request = new CreateParkingRequest(
             'owner-123',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
             50,

@@ -67,8 +67,11 @@ class EnterParkingTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner-789',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0
         );
@@ -148,7 +151,7 @@ class EnterParkingTest extends TestCase
 
         $request = new EnterParkingRequest('user-123', 'parking-456', $entryTime);
 
-        $parking = new Parking('parking-456', 'owner-789', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner-789', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->userRepository->method('exists')->willReturn(true);
         $this->parkingRepository->method('findById')->willReturn($parking);
@@ -226,8 +229,11 @@ class EnterParkingTest extends TestCase
         $parking = new Parking(
             'parking-456',
             'owner-789',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0,
             [
@@ -255,7 +261,7 @@ class EnterParkingTest extends TestCase
         $entryTime = new \DateTimeImmutable('2025-01-15 10:00:00');
         $request = new EnterParkingRequest('user-123', 'parking-456', $entryTime);
 
-        $parking = new Parking('parking-456', 'owner-789', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner-789', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $existingSession = new ParkingSession(
             'session-existing',
@@ -285,7 +291,7 @@ class EnterParkingTest extends TestCase
         $entryTime = new \DateTimeImmutable('2025-01-15 10:00:00');
         $request = new EnterParkingRequest('user-123', 'parking-456', $entryTime);
 
-        $parking = new Parking('parking-456', 'owner-789', 48.8566, 2.3522, 20, 15.0);
+        $parking = new Parking('parking-456', 'owner-789', 'Test Parking', 'Test Address 12345', 48.8566, 2.3522, 20, 20, 15.0);
 
         $this->userRepository->method('exists')->willReturn(true);
         $this->parkingRepository->method('findById')->willReturn($parking);

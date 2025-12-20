@@ -67,8 +67,11 @@ class ExitParkingTest extends TestCase
         $parking = new Parking(
             'parking-789',
             'owner-999',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0
         );
@@ -143,8 +146,11 @@ class ExitParkingTest extends TestCase
         $parking = new Parking(
             'parking-789',
             'owner-999',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0
         );
@@ -282,8 +288,11 @@ class ExitParkingTest extends TestCase
         $parking = new Parking(
             'parking-789',
             'owner-999',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0
         );
@@ -325,8 +334,11 @@ class ExitParkingTest extends TestCase
         $parking = new Parking(
             'parking-789',
             'owner-999',
+            'Test Parking',
+            'Test Address 12345',
             48.8566,
             2.3522,
+            20,
             20,
             15.0
         );

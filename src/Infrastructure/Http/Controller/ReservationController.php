@@ -10,7 +10,12 @@ use ParkingSystem\Infrastructure\Http\Validation\SimpleValidator;
 use ParkingSystem\UseCase\Reservation\CreateReservation;
 use ParkingSystem\UseCase\Reservation\CreateReservationRequest;
 use ParkingSystem\UseCase\Reservation\CancelReservation;
+use ParkingSystem\UseCase\Reservation\GenerateInvoice;
+use ParkingSystem\UseCase\Reservation\GenerateInvoiceRequest;
+use ParkingSystem\UseCase\Reservation\ReservationNotFoundException;
+use ParkingSystem\UseCase\Reservation\UnauthorizedReservationAccessException;
 use ParkingSystem\Domain\Repository\ReservationRepositoryInterface;
+use ParkingSystem\Domain\Repository\ParkingSessionRepositoryInterface;
 
 /**
  * Controller pour les endpoints Reservation
@@ -20,9 +25,11 @@ class ReservationController
     public function __construct(
         private CreateReservation $createReservationUseCase,
         private CancelReservation $cancelReservationUseCase,
+        private ?GenerateInvoice $generateInvoiceUseCase,
         private ReservationRepositoryInterface $reservationRepository,
         private \ParkingSystem\Domain\Repository\ParkingRepositoryInterface $parkingRepository,
-        private \ParkingSystem\Domain\Repository\UserRepositoryInterface $userRepository
+        private \ParkingSystem\Domain\Repository\UserRepositoryInterface $userRepository,
+        private ?ParkingSessionRepositoryInterface $sessionRepository = null
     ) {
     }
 
@@ -282,6 +289,54 @@ class ReservationController
         } catch (\Exception $e) {
             error_log('Error fetching owner reservations: ' . $e->getMessage());
             return JsonResponse::serverError('An error occurred while retrieving owner reservations');
+        }
+    }
+
+    /**
+     * GET /api/reservations/:id/invoice - Get invoice for a reservation (user auth)
+     */
+    public function invoice(HttpRequestInterface $request): JsonResponse
+    {
+        try {
+            $userId = $request->getPathParam('_userId');
+
+            if ($userId === null) {
+                return JsonResponse::unauthorized('User authentication required');
+            }
+
+            $reservationId = $request->getPathParam('id');
+
+            if ($reservationId === null) {
+                return JsonResponse::error('Reservation ID is required', null, 400);
+            }
+
+            if ($this->generateInvoiceUseCase === null) {
+                return JsonResponse::serverError('Invoice generation not available');
+            }
+
+            $invoiceRequest = new GenerateInvoiceRequest($reservationId, $userId);
+            $invoiceResponse = $this->generateInvoiceUseCase->execute($invoiceRequest);
+
+            // Check format query param
+            $query = $request->getQueryParams();
+            $format = $query['format'] ?? 'json';
+
+            if ($format === 'html') {
+                return new JsonResponse(
+                    200,
+                    ['Content-Type' => 'text/html'],
+                    $invoiceResponse->toHtml()
+                );
+            }
+
+            return JsonResponse::success($invoiceResponse->toArray(), 'Invoice generated');
+
+        } catch (ReservationNotFoundException $e) {
+            return JsonResponse::notFound($e->getMessage());
+        } catch (UnauthorizedReservationAccessException $e) {
+            return JsonResponse::forbidden($e->getMessage());
+        } catch (\Exception $e) {
+            return JsonResponse::serverError('Error generating invoice');
         }
     }
 }

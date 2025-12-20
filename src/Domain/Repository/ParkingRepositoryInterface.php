@@ -47,4 +47,6 @@ interface ParkingRepositoryInterface
     public function findMostPopular(int $limit = 10): array;
 
     public function searchByCriteria(array $criteria): array;
+
+    public function updateAvailableSpots(string $parkingId, int $availableSpots): void;
 }

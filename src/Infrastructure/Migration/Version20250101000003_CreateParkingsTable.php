@@ -25,9 +25,12 @@ class Version20250101000003_CreateParkingsTable implements MigrationInterface
         $sql = "CREATE TABLE IF NOT EXISTS parkings (
             id VARCHAR(36) PRIMARY KEY,
             owner_id VARCHAR(36) NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            address VARCHAR(500) NOT NULL,
             latitude DECIMAL(10, 8) NOT NULL,
             longitude DECIMAL(11, 8) NOT NULL,
             total_spaces INT NOT NULL,
+            available_spots INT NOT NULL,
             hourly_rate DECIMAL(10, 2) NOT NULL,
             opening_hours JSON,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

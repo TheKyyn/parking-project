@@ -8,6 +8,7 @@ use ParkingSystem\Infrastructure\Http\Controller\OwnerController;
 use ParkingSystem\Infrastructure\Http\Controller\ParkingController;
 use ParkingSystem\Infrastructure\Http\Controller\ReservationController;
 use ParkingSystem\Infrastructure\Http\Controller\SessionController;
+use ParkingSystem\Infrastructure\Http\Controller\SubscriptionController;
 use ParkingSystem\Infrastructure\Http\Middleware\AuthMiddleware;
 use ParkingSystem\Infrastructure\Http\Middleware\JwtAuthMiddleware;
 use ParkingSystem\Infrastructure\Http\Middleware\OwnerAuthMiddleware;
@@ -24,6 +25,7 @@ use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingOwnerRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLReservationRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLParkingSessionRepository;
+use ParkingSystem\Infrastructure\Repository\MySQL\MySQLSubscriptionRepository;
 use ParkingSystem\Infrastructure\Repository\MySQL\MySQLConnection;
 use ParkingSystem\UseCase\User\CreateUser;
 use ParkingSystem\UseCase\User\AuthenticateUser;
@@ -39,6 +41,10 @@ use ParkingSystem\UseCase\Reservation\CancelReservation;
 use ParkingSystem\UseCase\Reservation\GenerateInvoice;
 use ParkingSystem\UseCase\Session\EnterParking;
 use ParkingSystem\UseCase\Session\ExitParking;
+use ParkingSystem\UseCase\Subscription\CreateSubscription;
+use ParkingSystem\UseCase\Subscription\GetParkingSubscriptions;
+use ParkingSystem\Infrastructure\Service\SubscriptionSlotConflictChecker;
+use ParkingSystem\Infrastructure\Service\SubscriptionPricingCalculator;
 
 /**
  * Enregistre toutes les routes de l'application
@@ -49,8 +55,8 @@ return function (Router $router): void {
     // ==========================================
 
     // Load environment variables
-    if (file_exists(__DIR__ . '/../../.env')) {
-        $envLines = file(__DIR__ . '/../../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (file_exists(__DIR__ . '/../../../.env')) {
+        $envLines = file(__DIR__ . '/../../../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($envLines as $line) {
             if (strpos(trim($line), '#') === 0) {
                 continue;
@@ -77,6 +83,7 @@ return function (Router $router): void {
     $parkingOwnerRepository = new MySQLParkingOwnerRepository($dbConnection);
     $reservationRepository = new MySQLReservationRepository($dbConnection);
     $sessionRepository = new MySQLParkingSessionRepository($dbConnection);
+    $subscriptionRepository = new MySQLSubscriptionRepository($dbConnection);
 
     // Services
     $idGenerator = new UuidGenerator();
@@ -87,6 +94,8 @@ return function (Router $router): void {
     $conflictChecker = new SimpleConflictChecker($reservationRepository, $parkingRepository);
     $entryValidator = new SimpleEntryValidator($reservationRepository);
     $sessionPricingCalculator = new SessionPricingCalculator();
+    $subscriptionSlotConflictChecker = new SubscriptionSlotConflictChecker($subscriptionRepository);
+    $subscriptionPricingCalculator = new SubscriptionPricingCalculator();
 
     // Use Cases
     $createUserUseCase = new CreateUser(
@@ -171,6 +180,20 @@ return function (Router $router): void {
         $entryValidator
     );
 
+    $createSubscriptionUseCase = new CreateSubscription(
+        $subscriptionRepository,
+        $parkingRepository,
+        $userRepository,
+        $subscriptionSlotConflictChecker,
+        $subscriptionPricingCalculator,
+        $idGenerator
+    );
+
+    $getParkingSubscriptionsUseCase = new GetParkingSubscriptions(
+        $subscriptionRepository,
+        $parkingRepository
+    );
+
     // Controllers
     $userController = new UserController(
         $createUserUseCase,
@@ -207,6 +230,12 @@ return function (Router $router): void {
         $enterParkingUseCase,
         $exitParkingUseCase,
         $sessionRepository
+    );
+
+    $subscriptionController = new SubscriptionController(
+        $createSubscriptionUseCase,
+        $getParkingSubscriptionsUseCase,
+        $subscriptionRepository
     );
 
     // Middleware
@@ -309,4 +338,23 @@ return function (Router $router): void {
     $router->get('/api/sessions/:id', [$sessionController, 'show'])
         ->middleware($userAuthMiddleware)
         ->name('sessions.show');
+
+    $router->post('/api/subscriptions', [$subscriptionController, 'create'])
+        ->middleware($userAuthMiddleware)
+        ->name('subscriptions.create');
+
+    $router->get('/api/subscriptions', [$subscriptionController, 'index'])
+        ->middleware($userAuthMiddleware)
+        ->name('subscriptions.index');
+
+    $router->get('/api/subscriptions/:id', [$subscriptionController, 'show'])
+        ->middleware($userAuthMiddleware)
+        ->name('subscriptions.show');
+
+    $router->delete('/api/subscriptions/:id', [$subscriptionController, 'cancel'])
+        ->middleware($userAuthMiddleware)
+        ->name('subscriptions.cancel');
+
+    $router->get('/api/parkings/:id/subscriptions', [$subscriptionController, 'listByParking'])
+        ->name('parkings.subscriptions');
 };

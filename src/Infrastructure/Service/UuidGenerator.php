@@ -8,6 +8,7 @@ use ParkingSystem\UseCase\User\IdGeneratorInterface as UserIdGeneratorInterface;
 use ParkingSystem\UseCase\Parking\IdGeneratorInterface as ParkingIdGeneratorInterface;
 use ParkingSystem\UseCase\Reservation\IdGeneratorInterface as ReservationIdGeneratorInterface;
 use ParkingSystem\UseCase\Session\IdGeneratorInterface as SessionIdGeneratorInterface;
+use ParkingSystem\UseCase\Subscription\IdGeneratorInterface as SubscriptionIdGeneratorInterface;
 
 /**
  * UUID v4 identifier generator
@@ -16,7 +17,8 @@ class UuidGenerator implements
     UserIdGeneratorInterface,
     ParkingIdGeneratorInterface,
     ReservationIdGeneratorInterface,
-    SessionIdGeneratorInterface
+    SessionIdGeneratorInterface,
+    SubscriptionIdGeneratorInterface
 {
     /**
      * Generate a UUID v4 (random)

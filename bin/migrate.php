@@ -15,6 +15,20 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+if (file_exists(__DIR__ . '/../.env')) {
+    $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (empty($line) || strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $_ENV[trim($key)] = trim($value);
+            putenv(trim($key) . '=' . trim($value));
+        }
+    }
+}
+
 use ParkingSystem\Infrastructure\Migration\MigrationRunner;
 use ParkingSystem\Infrastructure\Migration\Version20250101000001_CreateUsersTable;
 use ParkingSystem\Infrastructure\Migration\Version20250101000002_CreateParkingOwnersTable;

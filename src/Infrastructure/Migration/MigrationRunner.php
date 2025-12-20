@@ -175,8 +175,6 @@ class MigrationRunner
 
     private function executeMigrationUp(MigrationInterface $migration): void
     {
-        $this->connection->beginTransaction();
-
         try {
             $migration->up($this->connection);
 
@@ -184,10 +182,7 @@ class MigrationRunner
                 "INSERT INTO {$this->migrationsTable} (version, applied_at, description) VALUES (?, NOW(), ?)"
             );
             $stmt->execute([$migration->getVersion(), $migration->getDescription()]);
-
-            $this->connection->commit();
         } catch (\Exception $e) {
-            $this->connection->rollBack();
             throw new \RuntimeException(
                 "Migration {$migration->getVersion()} failed: " . $e->getMessage(),
                 0,
@@ -198,8 +193,6 @@ class MigrationRunner
 
     private function executeMigrationDown(MigrationInterface $migration): void
     {
-        $this->connection->beginTransaction();
-
         try {
             $migration->down($this->connection);
 
@@ -207,10 +200,7 @@ class MigrationRunner
                 "DELETE FROM {$this->migrationsTable} WHERE version = ?"
             );
             $stmt->execute([$migration->getVersion()]);
-
-            $this->connection->commit();
         } catch (\Exception $e) {
-            $this->connection->rollBack();
             throw new \RuntimeException(
                 "Rollback of {$migration->getVersion()} failed: " . $e->getMessage(),
                 0,
